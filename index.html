@@ -1,6 +1,1237 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2c003e" />
+  <meta name="description" content="لعبة تفاعلية رومانسية لاختبار الذكريات والتواريخ المميزة" />
+  <title>رحلة حبنا: سليمان & حبيبتي</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    :root {
+      --primary: #d63384;
+      --primary-dark: #a61e63;
+      --bg-gradient-1: #1a0029;
+      --bg-gradient-2: #390050;
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --success: #00e676;
+      --error: #ff5252;
+      --input-bg: rgba(0, 0, 0, 0.4);
+      --border-radius: 20px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      font-family: 'Tajawal', sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 15px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container { width: 100%; max-width: 520px; position: relative; padding-bottom: 60px; }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--border-radius);
+      padding: 24px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% {transform: translateY(0px);}
+      50% {transform: translateY(-10px);}
+      100% {transform: translateY(0px);}
+    }
+
+    .btn {
+      background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+      border: none; color: white; padding: 16px; border-radius: 16px;
+      font-size: 16px; font-weight: 800; font-family: inherit; cursor: pointer;
+      width: 100%; transition: 0.2s; margin-top: 15px;
+      box-shadow: 0 5px 20px rgba(214, 51, 132, 0.4);
+      position: relative; overflow: hidden;
+      display: block;
+    }
+    .btn::after {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    .btn:hover::after { left: 100%; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-secondary { background: rgba(255,255,255,0.1); box-shadow: none; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-danger { background: rgba(255, 82, 82, 0.2); color: #ff8080; border: 1px solid #ff5252; box-shadow: none; }
+    .btn-small { padding: 8px 15px; font-size: 13px; width: auto; display: inline-block; margin: 5px; }
+    .btn-share { background: linear-gradient(45deg, #25D366, #128C7E); }
+
+    input, textarea, select {
+      width: 100%; padding: 15px; background: var(--input-bg);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+      color: white; font-family: inherit; font-size: 16px; margin-bottom: 12px;
+      outline: none; text-align: center;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); background: rgba(0,0,0,0.6); }
+
+    .screen { display: none; opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .screen.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+    .progress-container { margin-bottom: 25px; position: relative; }
+    .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #ff80ab); width: 0%; transition: width 0.5s ease; }
+
+    .pin-grid { display: flex; gap: 10px; justify-content: center; margin: 25px 0; direction: ltr; }
+    .pin-input { width: 55px; height: 65px; font-size: 26px; border-radius: 16px; margin: 0; text-align:center; }
+
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+    .option-card {
+      background: rgba(255,255,255,0.05); padding: 18px; border-radius: 16px;
+      text-align: center; cursor: pointer; border: 2px solid transparent;
+      transition: 0.2s; font-weight: 600; user-select:none;
+    }
+    .option-card:active { transform: scale(0.95); }
+    .option-card.selected { border-color: var(--primary); background: rgba(214, 51, 132, 0.15); font-weight: 800; }
+
+    #toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(20, 20, 30, 0.95); padding: 15px 30px; border-radius: 50px;
+      z-index: 9999; display: none; font-size: 15px; text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      width: max-content; max-width: 90%;
+    }
+    #toast.success { border-color: var(--success); color: var(--success); }
+    #toast.error { border-color: var(--error); color: var(--error); }
+
+    .settings-btn, .stats-btn, .backup-btn, .back-btn {
+      position: fixed;
+      width: 45px; height: 45px; background: rgba(0,0,0,0.4);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 100; font-size: 22px; backdrop-filter: blur(5px);
+      transition: 0.3s; border: none; color: white;
+    }
+    .settings-btn { top: 20px; left: 20px; }
+    .stats-btn { top: 75px; left: 20px; }
+    .backup-btn { top: 130px; left: 20px; }
+    .back-btn { top: 20px; right: 20px; display: none; }
+    .settings-btn:hover, .stats-btn:hover, .backup-btn:hover, .back-btn:hover { background: var(--primary); }
+    .back-btn.visible { display: flex; }
+
+    .admin-overlay {
+      position: fixed; inset: 0; background: #1a1a2e; z-index: 2000;
+      padding: 20px; overflow-y: auto; display: none;
+    }
+    .admin-overlay.open { display: block; animation: fadeIn 0.3s; }
+
+    .stage-editor {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 12px; border-radius: 12px; overflow: hidden;
+    }
+    .stage-header {
+      padding: 15px; display: flex; justify-content: space-between;
+      align-items: center; cursor: pointer; background: rgba(255,255,255,0.02);
+    }
+    .stage-body {
+      padding: 15px; display: none; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .stage-editor.open .stage-body { display: block; }
+
+    .confetti { position: fixed; width: 10px; height: 10px; animation: fall linear forwards; z-index: 9998; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    .stat-label { font-size: 13px; opacity: 0.75; }
+
+    .motivation-msg {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      padding: 30px;
+      border-radius: 20px;
+      z-index: 5000;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      max-width: 90%;
+      width: 350px;
+    }
+    .motivation-msg.show {
+      animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+    @keyframes popIn {
+      0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    }
+    .motivation-msg.hide { animation: popOut 0.3s ease forwards; }
+    @keyframes popOut { to { transform: translate(-50%, -50%) scale(0); opacity: 0; } }
+
+    .connection-status {
+      position: fixed; bottom: 20px; right: 20px;
+      background: rgba(0,0,0,0.7);
+      padding: 8px 15px; border-radius: 20px;
+      font-size: 12px; display: none; align-items: center; gap: 8px;
+      z-index: 1000;
+    }
+    .connection-status.offline { display: flex; }
+    .connection-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #ff5252; animation: blink 1s infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    .loader {
+      display: none;
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px; height: 50px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      z-index: 10000;
+    }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .card { padding: 18px; }
+      .options-grid { gap: 8px; }
+      .option-card { padding: 14px; font-size: 14px; }
+      .pin-input { width: 50px; height: 60px; font-size: 24px; }
+      .stats-grid { grid-template-columns: 1fr; gap: 10px; }
+    }
+  </style>
+</head>
+
 <body>
-<h1>مرحباً.. التجربة ناجحة!</h1>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div class="loader" id="loader" aria-label="Loading"></div>
+
+  <div class="connection-status" id="connectionStatus">
+    <div class="connection-dot"></div>
+    <span>غير متصل</span>
+  </div>
+
+  <button class="settings-btn" type="button" onclick="requestAdminAccess()" aria-label="لوحة التحكم">⚙️</button>
+  <button class="stats-btn" type="button" onclick="stats.show()" aria-label="الإحصائيات">📊</button>
+  <button class="backup-btn" type="button" onclick="backup.show()" aria-label="النسخ الاحتياطي">💾</button>
+  <button class="back-btn" id="backBtn" type="button" onclick="game.goBack()" aria-label="رجوع">⬅️</button>
+
+  <div class="container" id="mainContainer">
+
+    <div id="screen-start" class="screen active">
+      <div class="card" style="text-align:center; padding-top:40px; padding-bottom:40px;">
+        <div style="font-size:70px; margin-bottom:15px; animation:pulse 2s infinite;">💍❤️</div>
+        <h1 style="margin:0; font-size:32px;">رحلة حبنا</h1>
+        <p style="opacity:0.85; margin:15px 0 30px; line-height:1.8; font-size:16px;">
+          أجمل التواريخ.. وأحلى الذكريات.<br>
+          هل تتذكرين كل التفاصيل يا عمري؟
+        </p>
+        <button class="btn" type="button" onclick="game.start()">لنبدأ الرحلة ✨</button>
+      </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+      <div class="progress-container">
+        <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.65; margin-top:8px;">
+          <span id="stageCounter">1/12</span>
+          <span onclick="game.restart()" style="cursor:pointer; text-decoration:underline;">البداية</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="stageTitle" style="margin:0 0 5px 0; color:var(--primary); font-size:20px;"></h2>
+        <img id="stageImg" alt="" style="width:100%; border-radius:12px; margin-bottom:15px; display:none;">
+
+        <p id="stagePrompt" style="font-size:18px; line-height:1.6; white-space:pre-line; margin-bottom:20px; font-weight:600;"></p>
+
+        <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; font-size:14px; margin-bottom:20px; border-right:4px solid var(--primary);">
+          🫶 <b>مهمتك:</b> <span id="stageTask" style="opacity:0.92;"></span>
+        </div>
+
+        <div id="inputContainer"></div>
+
+        <div style="display:flex; gap:10px; margin-top:25px;">
+          <button class="btn btn-secondary" type="button" style="flex:1;" onclick="game.showHint()">تلميح؟</button>
+          <button class="btn" type="button" style="flex:2; margin-top:0;" onclick="game.check()">تأكيد الإجابة</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-win" class="screen">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:70px; margin-bottom:10px;">🎁👑</div>
+        <h1 style="color:var(--primary); margin-bottom:10px;">أحلى من يجاوب!</h1>
+        <p style="opacity:0.92; line-height:1.6; font-size:17px;">
+          كل هالتواريخ مهمة، بس وجودك بحياتي هو التاريخ الأهم.<br>
+          وصلتي للكنز يا قلبي.
+        </p>
+
+        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:16px; margin:25px 0; border:1px dashed rgba(255,255,255,0.3);">
+          <p style="margin:0 0 10px; font-size:14px; opacity:0.75;">الكلمة السرية لفتح الهدية:</p>
+          <h2 style="margin:0; color:var(--success); letter-spacing:1px;">أنا جاهزة للاستلام</h2>
+        </div>
+
+        <div class="stats-grid" style="margin:25px 0;">
+          <div class="stat-card">
+            <div class="stat-value" id="winAttempts">0</div>
+            <div class="stat-label">عدد المحاولات</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="winTime">00:00</div>
+            <div class="stat-label">الوقت المستغرق</div>
+          </div>
+        </div>
+
+        <button class="btn btn-share" type="button" onclick="stats.share()">مشاركة النتيجة 📤</button>
+        <button class="btn btn-secondary" type="button" onclick="game.restart(true)">إعادة اللعبة</button>
+      </div>
+    </div>
+
+    <div id="screen-stats" class="screen">
+      <div class="card">
+        <h2 style="margin:0 0 20px 0; color:var(--primary); text-align:center;">📊 الإحصائيات</h2>
+
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value" id="totalAttempts">0</div><div class="stat-label">إجمالي المحاولات</div></div>
+          <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">الإجابات الصحيحة</div></div>
+          <div class="stat-card"><div class="stat-value" id="wrongAnswers">0</div><div class="stat-label">الإجابات الخاطئة</div></div>
+          <div class="stat-card"><div class="stat-value" id="hintsUsed">0</div><div class="stat-label">التلميحات المستخدمة</div></div>
+          <div class="stat-card"><div class="stat-value" id="totalTime">00:00</div><div class="stat-label">إجمالي الوقت</div></div>
+          <div class="stat-card"><div class="stat-value" id="gamesCompleted">0</div><div class="stat-label">الألعاب المكتملة</div></div>
+        </div>
+
+        <button class="btn btn-danger" type="button" onclick="stats.reset()">إعادة تعيين الإحصائيات</button>
+        <button class="btn btn-secondary" type="button" onclick="stats.close()">إغلاق</button>
+      </div>
+    </div>
+
+    <div id="screen-backup" class="screen">
+      <div class="card">
+        <h2 style="margin:0 0 20px 0; color:var(--primary); text-align:center;">💾 النسخ الاحتياطي</h2>
+
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
+          <p style="margin:0 0 10px; font-size:14px; opacity:0.85;">احفظي تقدمك في اللعبة:</p>
+          <button class="btn" type="button" onclick="backup.export()">📥 تصدير البيانات</button>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
+          <p style="margin:0 0 10px; font-size:14px; opacity:0.85;">استرجاع نسخة سابقة:</p>
+          <button class="btn btn-secondary" type="button" onclick="backup.import()">📤 استيراد البيانات</button>
+        </div>
+
+        <div style="background:rgba(255,82,82,0.1); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid rgba(255,82,82,0.3);">
+          <p style="margin:0; font-size:13px; opacity:0.95;">⚠️ البيانات محفوظة محليًا على جهازك فقط</p>
+        </div>
+
+        <button class="btn btn-secondary" type="button" onclick="backup.close()">إغلاق</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="adminPanel" class="admin-overlay" aria-hidden="true">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+        <h2 style="margin:0">🛠 لوحة التحكم</h2>
+        <button class="btn-small btn-secondary" type="button" onclick="admin.close()">إغلاق</button>
+      </div>
+
+      <div style="background:#232336; padding:15px; border-radius:16px; margin-bottom:20px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn-small btn" type="button" onclick="admin.addStage()">+ سؤال</button>
+          <button class="btn-small btn" type="button" onclick="admin.editMotivations()">✏️ رسائل تحفيزية</button>
+          <button class="btn-small btn-secondary" type="button" onclick="admin.exportData()">نسخ</button>
+          <button class="btn-small btn-secondary" type="button" onclick="admin.importData()">لصق</button>
+          <button class="btn-small btn-danger" type="button" onclick="admin.resetFactory()">استعادة الأصلي</button>
+        </div>
+      </div>
+
+      <div id="stagesList"></div>
+      <div id="motivationsList" style="display:none;"></div>
+
+      <button class="btn" type="button" style="margin-top:20px;" onclick="admin.save()">💾 حفظ التغييرات</button>
+      <br><br><br>
+    </div>
+  </div>
+
+<script>
+/* ===========================
+   ✅ Config / Keys / Version
+=========================== */
+const APP_VERSION = 7;
+const STORAGE = {
+  data: `love_hunt_data_v${APP_VERSION}`,
+  motivations: `love_hunt_motivations_v${APP_VERSION}`,
+  progress: `love_hunt_progress_v${APP_VERSION}`,
+  stats: `love_hunt_stats_v${APP_VERSION}`,
+  allKeys() { return [this.data, this.motivations, this.progress, this.stats]; }
+};
+
+/* ===========================
+   🔐 Helpers (Escape + Admin PIN hash)
+=========================== */
+function escapeHTML(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const ADMIN_PIN_HASH = "6bfefd82c23dd6030bf505daa3cb5c55c7d1a294c0b483a724bccdc8a73577b6";
+const ADMIN_SALT = "love_hunt_admin_v7:";
+
+async function sha256Hex(input) {
+  if (!window.crypto?.subtle) return null;
+  const enc = new TextEncoder();
+  const data = enc.encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/* ===========================
+   🎮 Default Data
+=========================== */
+const DEFAULT_DATA = [
+  { title: "1. البداية 👶🏻", type: "pin4", prompt: "في أي سنة نوّر حبيبك الدنيا؟\n(سنة الميلاد)", answer: "1992", hint: "التسعينات..", task: "ارسلي صورتي وانا صغير اذا عندك (أو ايموجي طفل)", successMsg: "العمر كله يا رب ❤️" },
+  { title: "2. أول تواصل 📱", type: "pin4", prompt: "متى كان أول تواصل بينا؟\nاكتبي اليوم والشهر (يوم 13 شهر 4).\nمثال: 1304", answer: "1304", hint: "شهر أبريل.. يوم 13", task: "صوري الشاشة الحين وارسليها لي 😉", successMsg: "ما نسيتي! يا زين الذاكرة 😍" },
+  { title: "3. كلمات لا تُنسى 💬", type: "text", prompt: "وش هي أول جملة قلتها لك بعد رد السلام؟", answer: "ياهلا والله وسهلا ومرحبا", hint: "فيها ترحيب قوي (ياهلا...)", task: "سجلي فويس وقوليها بنفس نبرتي 😂", successMsg: "صح! كانت من كل قلبي والله 🤍" },
+  { title: "4. يوم الارتباط (العقد) 💍", type: "pin4", prompt: "تاريخ عقد قراننا (الملكة).\nيوم 24 شهر 10.\nاكتبيها: 2410", answer: "2410", hint: "شهر أكتوبر", task: "بوسة على الهواء 😘", successMsg: "يوم صرتي حلالي 💍" },
+  { title: "5. ذكرى شقيّة 😉", type: "pin4", prompt: "تتذكرين تاريخ أول 'قبصة'؟ 😂\nيوم 25 شهر 10.\nاكتبي: 2510", answer: "2510", hint: "بعد العقد بيوم واحد بس", task: "ارسلي إيموجي يضحك 😂", successMsg: "أحلى ذكرى وأحلى قبصة 😂❤️" },
+  { title: "6. اليوم المنتظر 👰🏻‍♀️", type: "pin4", prompt: "متى موعد زواجنا إن شاء الله؟\nيوم 17 شهر 4.\nاكتبي: 1704", answer: "1704", hint: "سنة 2026.. شهر أبريل", task: "دعوة حلوة من قلبك لنا", successMsg: "يا رب تمم لنا على خير 🤲🏻" },
+  { title: "7. شهر العسل ✈️", type: "pin4", prompt: "متى تاريخ سفرتنا؟\nيوم 20 شهر 4.\nاكتبي: 2004", answer: "2004", hint: "بعد الزواج بـ 3 أيام", task: "جهزي الشنطة (مجازياً) وارمزي بطيارة ✈️", successMsg: "بنطير لسابع سما من الفرحة ☁️" },
+  { title: "8. تفاصيل الاسم 🔢", type: "choice", prompt: "كم عدد حروف اسم حبيبك؟", answer: "5", options: "4,5,6,7", hint: "س ل ي ...", task: "اكتبي اسمي مزخرف", successMsg: "يا حلو اسمي وانتي تختارينه" },
+  { title: "9. معادلة حبنا ➕", type: "choice", prompt: "إذا جمعنا عدد حروف اسمك مع عدد حروف اسمي.. كم يطلع الناتج؟", answer: "9", options: "8,9,10,11", hint: "حروفي 5.. وحروفك 4", task: "ارسمي قلب واكتبي داخله رقم 9", successMsg: "رقم الكمال والحب ❤️" },
+  { title: "10. الأرشيف 📔", type: "text", prompt: "كيف قررنا نسجل ذكرياتنا ولحظاتنا الحلوة؟", answer: "بالدفتر", hint: "شيء نكتب فيه...", task: "اكتبي: أحبك في الدفتر وصوريها", successMsg: "عشان تبقى للعمر كله 📝" },
+  { title: "11. الرمز الخاص ♥️", type: "text", prompt: "وش الرمز (الإيموجي) اللي خصصته لك لحالك؟\n(انسخيه والصقيه)", answer: "♥️", hint: "القلب الأحمر الغامق: ♥️", task: "أرسلي الرمز لي الحين", successMsg: "أنتِ القلب كله ♥️" },
+  { title: "النهاية 🎁", type: "text", prompt: "عشان تفتحين الكنز.. اكتبي الجملة السحرية:\nأنا جاهزة للاستلام", answer: "أنا جاهزة للاستلام", hint: "بدون أي تغيير", task: "استعدي!!", successMsg: "ألف مبروك يا روحي! 🎉" }
+];
+
+const DEFAULT_MOTIVATIONS = [
+  { after: 3, message: "💪 رائع! 3 إجابات صحيحة.. استمري يا بطلة!" },
+  { after: 6, message: "🔥 نصف الطريق! ذاكرتك خيالية يا عمري" },
+  { after: 9, message: "⭐ تسعة من اثني عشر! أنتِ أسطورة!" }
+];
+
+let stages = [];
+let motivations = [];
+let currentStageIdx = 0;
+
+let gameStats = {
+  totalAttempts: 0,
+  correctAnswers: 0,
+  wrongAnswers: 0,
+  hintsUsed: 0,
+  gamesCompleted: 0,
+  totalTimeSeconds: 0,
+  currentSessionStart: null
+};
+
+/* ===========================
+   🌐 Connection Monitor
+=========================== */
+const connection = {
+  init() {
+    window.addEventListener('online', () => this.update(true));
+    window.addEventListener('offline', () => this.update(false));
+    this.update(navigator.onLine);
+  },
+  update(isOnline) {
+    const el = document.getElementById('connectionStatus');
+    if (!el) return;
+    if (isOnline) el.classList.remove('offline');
+    else el.classList.add('offline');
+  }
+};
+
+/* ===========================
+   🎨 UI helpers
+=========================== */
+const ui = {
+  toast(msg, type = 'normal') {
+    const el = document.getElementById('toast');
+    el.textContent = String(msg ?? '');
+    el.className = type;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 3000);
+  },
+  setLoading(on) {
+    const el = document.getElementById('loader');
+    if (!el) return;
+    el.style.display = on ? 'block' : 'none';
+  },
+  confetti() {
+    const colors = ['#d63384', '#ffffff', '#ff80ab', '#ffc107'];
+    for (let i = 0; i < 60; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = (-10 - Math.random() * 30) + 'px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (Math.random() * 2 + 1) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+  },
+  showMotivation(msg) {
+    const el = document.createElement('div');
+    el.className = 'motivation-msg';
+    el.innerHTML = `
+      <div style="font-size:50px; margin-bottom:15px;">🎉</div>
+      <p id="motMsg" style="margin:0; font-size:18px; line-height:1.6;"></p>
+    `;
+    document.body.appendChild(el);
+    el.querySelector('#motMsg').textContent = String(msg ?? '');
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.add('hide');
+      setTimeout(() => el.remove(), 300);
+    }, 3000);
+  }
+};
+
+/* ===========================
+   📊 Stats
+=========================== */
+const stats = {
+  load() {
+    try {
+      const saved = localStorage.getItem(STORAGE.stats);
+      if (saved) Object.assign(gameStats, JSON.parse(saved));
+    } catch (e) { console.warn("Stats load failed:", e); }
+  },
+  save() {
+    try { localStorage.setItem(STORAGE.stats, JSON.stringify(gameStats)); }
+    catch (e) { console.warn("Stats save failed:", e); }
+  },
+  show() {
+    document.getElementById('totalAttempts').innerText = gameStats.totalAttempts;
+    document.getElementById('correctAnswers').innerText = gameStats.correctAnswers;
+    document.getElementById('wrongAnswers').innerText = gameStats.wrongAnswers;
+    document.getElementById('hintsUsed').innerText = gameStats.hintsUsed;
+    document.getElementById('totalTime').innerText = game.formatTime(gameStats.totalTimeSeconds);
+    document.getElementById('gamesCompleted').innerText = gameStats.gamesCompleted;
+    game.showScreen('screen-stats');
+  },
+  close() {
+    if (currentStageIdx > 0 && currentStageIdx < stages.length) game.showScreen('screen-game');
+    else game.showScreen('screen-start');
+  },
+  reset() {
+    if (!confirm("متأكدة من حذف كل الإحصائيات؟")) return;
+    gameStats = {
+      totalAttempts: 0, correctAnswers: 0, wrongAnswers: 0, hintsUsed: 0,
+      gamesCompleted: 0, totalTimeSeconds: 0, currentSessionStart: null
+    };
+    this.save();
+    this.show();
+    ui.toast("تم إعادة تعيين الإحصائيات", "success");
+  },
+  share() {
+    const text = `🎮 أنهيت لعبة "رحلة حبنا" 💍❤️
+
+📊 إحصائياتي:
+• المحاولات: ${gameStats.totalAttempts}
+• الإجابات الصحيحة: ${gameStats.correctAnswers}
+• الوقت: ${game.formatTime(gameStats.totalTimeSeconds)}
+• الألعاب المكتملة: ${gameStats.gamesCompleted}
+
+✨ ذاكرتي قوية والحب أقوى!`;
+
+    if (navigator.share) {
+      navigator.share({ title: 'رحلة حبنا', text }).catch(() => this.copyToClipboard(text));
+    } else {
+      this.copyToClipboard(text);
+    }
+  },
+  copyToClipboard(text) {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => ui.toast("تم نسخ النتيجة! 💕", "success"))
+        .catch(() => ui.toast("النص جاهز للمشاركة!", "success"));
+    } else {
+      ui.toast("النص جاهز للمشاركة!", "success");
+    }
+  }
+};
+
+/* ===========================
+   💾 Backup (export/import)
+=========================== */
+const backup = {
+  show() { game.showScreen('screen-backup'); },
+  close() {
+    if (currentStageIdx > 0 && currentStageIdx < stages.length) game.showScreen('screen-game');
+    else game.showScreen('screen-start');
+  },
+  export() {
+    try {
+      const data = {
+        appVersion: APP_VERSION,
+        timestamp: Date.now(),
+        stages,
+        motivations,
+        progress: currentStageIdx,
+        stats: gameStats
+      };
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `love-hunt-backup-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      ui.toast("✅ تم تصدير البيانات بنجاح!", "success");
+    } catch (e) {
+      console.error("Export failed:", e);
+      ui.toast("❌ فشل التصدير", "error");
+    }
+  },
+  import() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          if (!data || !data.stages || !Array.isArray(data.stages)) throw new Error("Bad file");
+
+          stages = data.stages;
+          motivations = Array.isArray(data.motivations) ? data.motivations : DEFAULT_MOTIVATIONS;
+          currentStageIdx = Number.isFinite(data.progress) ? data.progress : 0;
+
+          if (data.stats && typeof data.stats === 'object') Object.assign(gameStats, data.stats);
+
+          localStorage.setItem(STORAGE.data, JSON.stringify(stages));
+          localStorage.setItem(STORAGE.motivations, JSON.stringify(motivations));
+          localStorage.setItem(STORAGE.progress, String(currentStageIdx));
+          stats.save();
+
+          ui.toast("✅ تم الاستيراد بنجاح!", "success");
+          setTimeout(() => location.reload(), 800);
+        } catch (err) {
+          console.error(err);
+          ui.toast("❌ فشل الاستيراد: ملف غير صالح", "error");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+};
+
+/* ===========================
+   🎮 Game Logic
+=========================== */
+const game = {
+  init() {
+    connection.init();
+
+    try {
+      const savedData = localStorage.getItem(STORAGE.data);
+      stages = savedData ? JSON.parse(savedData) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+
+      const savedMot = localStorage.getItem(STORAGE.motivations);
+      motivations = savedMot ? JSON.parse(savedMot) : JSON.parse(JSON.stringify(DEFAULT_MOTIVATIONS));
+
+      const savedProgress = localStorage.getItem(STORAGE.progress);
+      if (savedProgress !== null) currentStageIdx = parseInt(savedProgress, 10) || 0;
+
+      stats.load();
+
+      if (currentStageIdx > 0 && currentStageIdx < stages.length) {
+        this.showScreen('screen-game');
+        this.render();
+        if (!gameStats.currentSessionStart) gameStats.currentSessionStart = Date.now();
+      }
+      this.updateBackButton();
+    } catch (e) {
+      console.error("Initialization Error:", e);
+      alert("حدث خطأ في تحميل اللعبة. سيتم إعادة تعيين البيانات.");
+      this.resetOnlyOurKeys();
+      location.reload();
+    }
+
+    this.registerServiceWorker();
+  },
+
+  resetOnlyOurKeys() {
+    STORAGE.allKeys().forEach(k => localStorage.removeItem(k));
+  },
+
+  async registerServiceWorker() {
+    try {
+      if ('serviceWorker' in navigator) {
+        await navigator.serviceWorker.register('./sw.js', { scope: './' });
+      }
+    } catch (e) {
+      console.warn("SW register failed:", e);
+    }
+  },
+
+  start() {
+    currentStageIdx = 0;
+    this.saveProgress();
+    this.showScreen('screen-game');
+    this.render();
+    this.updateBackButton();
+    gameStats.currentSessionStart = Date.now();
+  },
+
+  restart(full = false) {
+    if (full || confirm("متأكدة تبين تعيدين من البداية؟")) {
+      currentStageIdx = 0;
+      this.saveProgress();
+      this.showScreen('screen-start');
+      this.updateBackButton();
+      gameStats.currentSessionStart = null;
+    }
+  },
+
+  goBack() {
+    if (currentStageIdx > 0) {
+      currentStageIdx--;
+      this.saveProgress();
+      this.render();
+      this.updateBackButton();
+    }
+  },
+
+  updateBackButton() {
+    const btn = document.getElementById('backBtn');
+    const inGame = document.getElementById('screen-game').classList.contains('active');
+    if (currentStageIdx > 0 && inGame) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  },
+
+  render() {
+    const data = stages[currentStageIdx];
+    if (!data) return;
+
+    document.getElementById('stageTitle').innerText = data.title;
+    document.getElementById('stageCounter').innerText = `${currentStageIdx + 1} / ${stages.length}`;
+    document.getElementById('stagePrompt').innerText = data.prompt;
+    document.getElementById('stageTask').innerText = data.task || "استمري بحبك ❤️";
+
+    const imgEl = document.getElementById('stageImg');
+    if (data.img && String(data.img).trim() !== "") {
+      imgEl.src = data.img;
+      imgEl.style.display = "block";
+    } else {
+      imgEl.style.display = "none";
+      imgEl.removeAttribute('src');
+    }
+
+    const pct = ((currentStageIdx + 1) / stages.length) * 100;
+    document.getElementById('progressBar').style.width = `${pct}%`;
+
+    const container = document.getElementById('inputContainer');
+    container.innerHTML = '';
+
+    if (data.type === 'text') {
+      container.innerHTML = `<input type="text" id="ansInput" placeholder="اكتبي الإجابة هنا..." autocomplete="off">`;
+      setTimeout(() => {
+        const inp = document.getElementById('ansInput');
+        if (inp) {
+          inp.focus();
+          inp.addEventListener("keypress", (e) => { if (e.key === "Enter") game.check(); });
+        }
+      }, 50);
+    }
+    else if (data.type === 'choice') {
+      const opts = String(data.options || '').split(',').map(s => s.trim()).filter(Boolean);
+      const grid = document.createElement('div');
+      grid.className = 'options-grid';
+
+      opts.forEach(val => {
+        const item = document.createElement('div');
+        item.className = 'option-card';
+        item.textContent = val;
+        item.addEventListener('click', () => this.selectOption(item, val));
+        grid.appendChild(item);
+      });
+
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.id = 'ansInput';
+
+      container.appendChild(grid);
+      container.appendChild(hidden);
+    }
+    else if (String(data.type).startsWith('pin')) {
+      const len = data.type === 'pin3' ? 3 : 4;
+      const grid = document.createElement('div');
+      grid.className = 'pin-grid';
+
+      for (let i = 0; i < len; i++) {
+        const inp = document.createElement('input');
+        inp.type = 'tel';
+        inp.maxLength = 1;
+        inp.className = 'pin-input';
+        inp.id = `p${i}`;
+        inp.inputMode = 'numeric';
+        grid.appendChild(inp);
+      }
+
+      container.appendChild(grid);
+      this.setupPinLogic(len);
+    }
+  },
+
+  setupPinLogic(len) {
+    const inputs = document.querySelectorAll('.pin-input');
+    if (inputs[0]) {
+      inputs[0].focus();
+      inputs[0].addEventListener('paste', (e) => {
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const digits = text.replace(/\D/g, '').slice(0, len);
+        if (digits.length === len) {
+          e.preventDefault();
+          for (let i = 0; i < len; i++) {
+            const el = document.getElementById(`p${i}`);
+            if (el) el.value = digits[i];
+          }
+          const last = document.getElementById(`p${len-1}`);
+          if (last) last.focus();
+        }
+      });
+    }
+
+    inputs.forEach((input, idx) => {
+      input.addEventListener('input', (e) => {
+        e.target.value = (e.target.value || '').replace(/\D/g,'').slice(0,1);
+        if (e.target.value && idx < len - 1) document.getElementById(`p${idx+1}`).focus();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && idx > 0) document.getElementById(`p${idx-1}`).focus();
+        if (e.key === 'Enter') game.check();
+      });
+    });
+  },
+
+  selectOption(el, val) {
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const hidden = document.getElementById('ansInput');
+    if (hidden) hidden.value = val;
+  },
+
+  check() {
+    const data = stages[currentStageIdx];
+    let userAns = "";
+
+    if (String(data.type).startsWith('pin')) {
+      document.querySelectorAll('.pin-input').forEach(i => userAns += i.value);
+    } else {
+      const inp = document.getElementById('ansInput');
+      userAns = inp ? inp.value : "";
+    }
+
+    if (!userAns) {
+      ui.toast("⚠️ لا تستعجلين.. جاوبي أول!", "error");
+      return;
+    }
+
+    gameStats.totalAttempts++;
+
+    const cleanUser = this.normalize(userAns);
+    const cleanCorrect = this.normalize(data.answer);
+
+    const isCorrect = (cleanUser === cleanCorrect);
+
+    if (isCorrect) {
+      gameStats.correctAnswers++;
+      this.handleSuccess(data);
+    } else {
+      gameStats.wrongAnswers++;
+      stats.save();
+      ui.toast("❌ خطأ.. حاولي تتذكرين 😉", "error");
+      if (navigator.vibrate) navigator.vibrate(200);
+    }
+  },
+
+  normalize(text) {
+    return String(text ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s/g, '')
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي');
+  },
+
+  handleSuccess(data) {
+    ui.toast(data.successMsg || "✅ إجابة صحيحة!", "success");
+    ui.confetti();
+    stats.save();
+
+    setTimeout(() => {
+      currentStageIdx++;
+      this.saveProgress();
+      this.checkMotivation();
+
+      if (currentStageIdx >= stages.length) this.completeGame();
+      else { this.render(); this.updateBackButton(); }
+    }, 900);
+  },
+
+  checkMotivation() {
+    motivations.forEach(mot => {
+      if (gameStats.correctAnswers === mot.after) ui.showMotivation(mot.message);
+    });
+  },
+
+  completeGame() {
+    gameStats.gamesCompleted++;
+
+    if (gameStats.currentSessionStart) {
+      const timeSpent = Math.floor((Date.now() - gameStats.currentSessionStart) / 1000);
+      gameStats.totalTimeSeconds += timeSpent;
+      gameStats.currentSessionStart = null;
+
+      document.getElementById('winAttempts').innerText = gameStats.totalAttempts;
+      document.getElementById('winTime').innerText = this.formatTime(timeSpent);
+    }
+
+    stats.save();
+    this.showScreen('screen-win');
+  },
+
+  formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  },
+
+  showHint() {
+    const data = stages[currentStageIdx];
+    gameStats.hintsUsed++;
+    stats.save();
+    ui.toast("💡 " + (data.hint || "لا يوجد تلميح"), "success");
+  },
+
+  saveProgress() {
+    try { localStorage.setItem(STORAGE.progress, String(currentStageIdx)); }
+    catch (e) { console.warn("Failed to save progress:", e); }
+  },
+
+  showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('active');
+    this.updateBackButton();
+  }
+};
+
+/* ===========================
+   🛠 Admin Panel (minimal)
+=========================== */
+const admin = {
+  toggleAccordion(idx) {
+    document.querySelectorAll('.stage-editor').forEach((el, i) => {
+      if (i === idx) el.classList.toggle('open');
+      else el.classList.remove('open');
+    });
+  },
+
+  renderList() {
+    const list = document.getElementById('stagesList');
+    list.innerHTML = '';
+    list.style.display = 'block';
+    document.getElementById('motivationsList').style.display = 'none';
+
+    stages.forEach((s, idx) => {
+      const div = document.createElement('div');
+      div.className = 'stage-editor';
+      div.innerHTML = `
+        <div class="stage-header">
+          <span>${escapeHTML(idx+1)}. ${escapeHTML(s.title)}</span>
+          <span style="font-size:10px; opacity:0.6">${escapeHTML(s.type)}</span>
+        </div>
+        <div class="stage-body">
+          <label>عنوان السؤال</label>
+          <input type="text" value="${escapeHTML(s.title)}" data-idx="${idx}" data-key="title">
+
+          <div style="display:flex; gap:10px">
+            <div style="flex:1">
+              <label>النوع</label>
+              <select data-idx="${idx}" data-key="type">
+                <option value="text" ${s.type==='text'?'selected':''}>نص</option>
+                <option value="pin4" ${s.type==='pin4'?'selected':''}>أرقام (4)</option>
+                <option value="pin3" ${s.type==='pin3'?'selected':''}>أرقام (3)</option>
+                <option value="choice" ${s.type==='choice'?'selected':''}>خيارات</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label>الإجابة</label>
+              <input type="text" value="${escapeHTML(s.answer)}" data-idx="${idx}" data-key="answer">
+            </div>
+          </div>
+
+          <label>نص اللغز</label>
+          <textarea rows="2" data-idx="${idx}" data-key="prompt">${escapeHTML(s.prompt)}</textarea>
+
+          <div class="choice-only" style="${s.type==='choice'?'':'display:none'}">
+            <label>الخيارات (بينهم فاصلة)</label>
+            <input type="text" value="${escapeHTML(s.options || '')}" data-idx="${idx}" data-key="options">
+          </div>
+
+          <label>التلميح</label>
+          <input type="text" value="${escapeHTML(s.hint || '')}" data-idx="${idx}" data-key="hint">
+
+          <label>رسالة النجاح</label>
+          <input type="text" value="${escapeHTML(s.successMsg || '')}" data-idx="${idx}" data-key="successMsg">
+
+          <label>المهمة</label>
+          <input type="text" value="${escapeHTML(s.task || '')}" data-idx="${idx}" data-key="task">
+
+          <label>رابط صورة (اختياري)</label>
+          <input type="text" value="${escapeHTML(s.img || '')}" data-idx="${idx}" data-key="img" placeholder="https://...">
+
+          <div style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; display:flex; gap:10px;">
+            <button class="btn-small btn-secondary" type="button" onclick="admin.move(${idx}, -1)">⬆️</button>
+            <button class="btn-small btn-secondary" type="button" onclick="admin.move(${idx}, 1)">⬇️</button>
+            <button class="btn-small btn-danger" type="button" onclick="admin.remove(${idx})" style="margin-right:auto">حذف</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+
+      div.querySelector('.stage-header').addEventListener('click', () => this.toggleAccordion(idx));
+    });
+
+    list.querySelectorAll('input[data-idx], textarea[data-idx], select[data-idx]').forEach(el => {
+      el.addEventListener('change', () => {
+        const idx = parseInt(el.getAttribute('data-idx'), 10);
+        const key = el.getAttribute('data-key');
+        const val = el.value;
+
+        stages[idx][key] = val;
+
+        if (key === 'type') {
+          const parent = el.closest('.stage-body');
+          const box = parent.querySelector('.choice-only');
+          if (box) box.style.display = (val === 'choice') ? 'block' : 'none';
+          if (val === 'choice' && !stages[idx].options) stages[idx].options = "1,2,3,4";
+        }
+      });
+    });
+  },
+
+  addStage() {
+    stages.push({ title: "سؤال جديد", type: "text", prompt: "السؤال...", answer: "الجواب", hint: "", task: "", successMsg: "", img: "" });
+    this.renderList();
+    this.toggleAccordion(stages.length - 1);
+  },
+
+  remove(idx) {
+    if (!confirm("حذف هذا السؤال؟")) return;
+    stages.splice(idx, 1);
+    this.renderList();
+  },
+
+  move(idx, dir) {
+    if (idx + dir < 0 || idx + dir >= stages.length) return;
+    [stages[idx], stages[idx + dir]] = [stages[idx + dir], stages[idx]];
+    this.renderList();
+  },
+
+  editMotivations() {
+    const list = document.getElementById('motivationsList');
+    list.innerHTML = '<h3 style="margin-bottom:15px;">✏️ تعديل الرسائل التحفيزية</h3>';
+    list.style.display = 'block';
+    document.getElementById('stagesList').style.display = 'none';
+
+    motivations.forEach((mot, idx) => {
+      const div = document.createElement('div');
+      div.className = 'stage-editor open';
+      div.innerHTML = `
+        <div class="stage-body">
+          <label>بعد عدد الإجابات</label>
+          <input type="number" value="${escapeHTML(mot.after)}" data-idx="${idx}" data-key="after">
+          <label>الرسالة</label>
+          <textarea rows="2" data-idx="${idx}" data-key="message">${escapeHTML(mot.message)}</textarea>
+          <button class="btn-small btn-danger" type="button" onclick="admin.removeMotivation(${idx})">حذف</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+
+    list.querySelectorAll('input[data-idx], textarea[data-idx]').forEach(el => {
+      el.addEventListener('change', () => {
+        const idx = parseInt(el.getAttribute('data-idx'), 10);
+        const key = el.getAttribute('data-key');
+        if (key === 'after') motivations[idx].after = parseInt(el.value, 10) || 0;
+        else motivations[idx].message = el.value;
+      });
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-small btn';
+    addBtn.type = 'button';
+    addBtn.innerText = '+ إضافة رسالة';
+    addBtn.onclick = () => { motivations.push({ after: 3, message: "رسالة جديدة" }); this.editMotivations(); };
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-small btn-secondary';
+    backBtn.type = 'button';
+    backBtn.innerText = 'رجوع للأسئلة';
+    backBtn.onclick = () => this.renderList();
+    backBtn.style.marginRight = '10px';
+
+    list.appendChild(addBtn);
+    list.appendChild(backBtn);
+  },
+
+  removeMotivation(idx) {
+    if (!confirm("حذف هذه الرسالة؟")) return;
+    motivations.splice(idx, 1);
+    this.editMotivations();
+  },
+
+  save() {
+    try {
+      localStorage.setItem(STORAGE.data, JSON.stringify(stages));
+      localStorage.setItem(STORAGE.motivations, JSON.stringify(motivations));
+      ui.toast("تم الحفظ بنجاح! 💾", "success");
+      setTimeout(() => location.reload(), 600);
+    } catch (e) {
+      console.error(e);
+      ui.toast("فشل الحفظ (Storage)", "error");
+    }
+  },
+
+  exportData() {
+    const data = JSON.stringify({ stages, motivations }, null, 2);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(data).then(() => ui.toast("تم النسخ 📋", "success"))
+        .catch(() => ui.toast("انسخ يدويًا من النافذة", "success"));
+    } else {
+      prompt("انسخ هذا النص:", data);
+    }
+  },
+
+  importData() {
+    const data = prompt("الصق البيانات هنا (JSON):");
+    if (!data) return;
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed.stages && Array.isArray(parsed.stages)) stages = parsed.stages;
+      else if (Array.isArray(parsed)) stages = parsed;
+      motivations = (parsed.motivations && Array.isArray(parsed.motivations)) ? parsed.motivations : DEFAULT_MOTIVATIONS;
+
+      this.renderList();
+      ui.toast("تم اللصق، اضغط حفظ", "success");
+    } catch (e) {
+      ui.toast("الكود غير صالح", "error");
+    }
+  },
+
+  resetFactory() {
+    if (!confirm("رجوع للإعدادات الأصلية؟")) return;
+    STORAGE.allKeys().forEach(k => localStorage.removeItem(k));
+    location.reload();
+  },
+
+  close() {
+    const panel = document.getElementById('adminPanel');
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+  },
+
+  open() {
+    const panel = document.getElementById('adminPanel');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+  }
+};
+
+async function requestAdminAccess() {
+  const pin = prompt("الرمز السري:");
+  if (pin === null) return;
+
+  try {
+    ui.setLoading(true);
+    const hashed = await sha256Hex(ADMIN_SALT + pin);
+    ui.setLoading(false);
+
+    if (hashed && hashed === ADMIN_PIN_HASH) {
+      admin.open();
+      admin.renderList();
+    } else {
+      ui.toast("خطأ 🚫", "error");
+    }
+  } catch (e) {
+    ui.setLoading(false);
+    ui.toast("تعذر التحقق من الرمز", "error");
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  game.init();
+});
+</script>
 </body>
 </html>
