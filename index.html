@@ -4,16 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#2c003e" />
-  <meta name="description" content="لعبة تفاعلية رومانسية لاختبار الذكريات والتواريخ المميزة" />
-  <title>رحلة حبنا: سليمان & حبيبتي</title>
+  <meta name="description" content="لعبة تفاعلية رومانسية - رحلة عبر 4 مراحل" />
+  <title>رحلة حبنا: 4 مراحل</title>
 
-  <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
     :root {
@@ -25,6 +21,8 @@
       --text-main: #ffffff;
       --success: #00e676;
       --error: #ff5252;
+      --warning: #ffc107;
+      --mission: #ff6b35;
       --input-bg: rgba(0, 0, 0, 0.4);
       --border-radius: 20px;
     }
@@ -93,6 +91,16 @@
     .btn-danger { background: rgba(255, 82, 82, 0.2); color: #ff8080; border: 1px solid #ff5252; box-shadow: none; }
     .btn-small { padding: 8px 15px; font-size: 13px; width: auto; display: inline-block; margin: 5px; }
     .btn-share { background: linear-gradient(45deg, #25D366, #128C7E); }
+    .btn-mission { 
+      background: linear-gradient(45deg, var(--mission), #e55d2d); 
+      box-shadow: 0 5px 20px rgba(255, 107, 53, 0.5);
+      animation: pulse-mission 2s infinite;
+    }
+
+    @keyframes pulse-mission {
+      0%, 100% { transform: scale(1); box-shadow: 0 5px 20px rgba(255, 107, 53, 0.5); }
+      50% { transform: scale(1.03); box-shadow: 0 8px 30px rgba(255, 107, 53, 0.7); }
+    }
 
     input, textarea, select {
       width: 100%; padding: 15px; background: var(--input-bg);
@@ -109,6 +117,25 @@
     .progress-container { margin-bottom: 25px; position: relative; }
     .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #ff80ab); width: 0%; transition: width 0.5s ease; }
+
+    .phase-indicator {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border-right: 4px solid var(--primary);
+      text-align: center;
+    }
+    .phase-indicator .phase-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    .phase-indicator .phase-subtitle {
+      font-size: 13px;
+      opacity: 0.75;
+    }
 
     .pin-grid { display: flex; gap: 10px; justify-content: center; margin: 25px 0; direction: ltr; }
     .pin-input { width: 55px; height: 65px; font-size: 26px; border-radius: 16px; margin: 0; text-align:center; }
@@ -152,6 +179,21 @@
     }
     .admin-overlay.open { display: block; animation: fadeIn 0.3s; }
 
+    .phase-editor {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 15px; border-radius: 12px; overflow: hidden;
+    }
+    .phase-header {
+      padding: 15px; display: flex; justify-content: space-between;
+      align-items: center; cursor: pointer; background: linear-gradient(135deg, rgba(214, 51, 132, 0.2), rgba(166, 30, 99, 0.2));
+      font-weight: 700; font-size: 16px;
+    }
+    .phase-body {
+      padding: 15px; display: none; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .phase-editor.open .phase-body { display: block; }
+
     .stage-editor {
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.1);
@@ -166,10 +208,16 @@
     }
     .stage-editor.open .stage-body { display: block; }
 
+    .mission-editor {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(229, 93, 45, 0.1));
+      border: 2px solid rgba(255, 107, 53, 0.3);
+      padding: 15px;
+      border-radius: 12px;
+      margin: 15px 0;
+    }
+
     .confetti { position: fixed; width: 10px; height: 10px; animation: fall linear forwards; z-index: 9998; }
     @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
 
     .stats-grid {
       display: grid;
@@ -192,43 +240,72 @@
     }
     .stat-label { font-size: 13px; opacity: 0.75; }
 
-    .motivation-msg {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      padding: 30px;
+    .phase-mission-screen {
+      background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(229,93,45,0.15));
+      border: 3px solid var(--mission);
       border-radius: 20px;
-      z-index: 5000;
+      padding: 30px;
+      margin: 20px 0;
       text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-      max-width: 90%;
-      width: 350px;
+      box-shadow: 0 0 30px rgba(255,107,53,0.3);
+      animation: glow-border 2s infinite;
     }
-    .motivation-msg.show {
-      animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-    }
-    @keyframes popIn {
-      0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; }
-      100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-    }
-    .motivation-msg.hide { animation: popOut 0.3s ease forwards; }
-    @keyframes popOut { to { transform: translate(-50%, -50%) scale(0); opacity: 0; } }
 
-    .connection-status {
-      position: fixed; bottom: 20px; right: 20px;
-      background: rgba(0,0,0,0.7);
-      padding: 8px 15px; border-radius: 20px;
-      font-size: 12px; display: none; align-items: center; gap: 8px;
-      z-index: 1000;
+    @keyframes glow-border {
+      0%, 100% { box-shadow: 0 0 20px rgba(255,107,53,0.3); }
+      50% { box-shadow: 0 0 40px rgba(255,107,53,0.6); }
     }
-    .connection-status.offline { display: flex; }
-    .connection-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #ff5252; animation: blink 1s infinite;
+
+    .phase-mission-screen .mission-icon {
+      font-size: 80px;
+      margin-bottom: 15px;
+      animation: bounce 1s infinite;
     }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .phase-mission-screen .mission-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--mission);
+      margin-bottom: 15px;
+      text-shadow: 0 2px 10px rgba(255,107,53,0.5);
+    }
+
+    .phase-mission-screen .mission-desc {
+      font-size: 17px;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      opacity: 0.95;
+    }
+
+    .secret-code-box {
+      background: rgba(0,0,0,0.5);
+      border: 2px dashed var(--warning);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .secret-code-box .code-label {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
+    .secret-code-box input {
+      background: rgba(0,0,0,0.6);
+      border: 2px solid var(--warning);
+      color: var(--warning);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 0;
+    }
 
     .loader {
       display: none;
@@ -242,6 +319,8 @@
       z-index: 10000;
     }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
 
     @media (max-width: 600px) {
       .card { padding: 18px; }
@@ -249,6 +328,9 @@
       .option-card { padding: 14px; font-size: 14px; }
       .pin-input { width: 50px; height: 60px; font-size: 24px; }
       .stats-grid { grid-template-columns: 1fr; gap: 10px; }
+      .phase-mission-screen { padding: 20px; }
+      .phase-mission-screen .mission-icon { font-size: 60px; }
+      .phase-mission-screen .mission-title { font-size: 22px; }
     }
   </style>
 </head>
@@ -257,11 +339,6 @@
   <div id="toast" role="status" aria-live="polite"></div>
   <div class="loader" id="loader" aria-label="Loading"></div>
 
-  <div class="connection-status" id="connectionStatus">
-    <div class="connection-dot"></div>
-    <span>غير متصل</span>
-  </div>
-
   <button class="settings-btn" type="button" onclick="requestAdminAccess()" aria-label="لوحة التحكم">⚙️</button>
   <button class="stats-btn" type="button" onclick="stats.show()" aria-label="الإحصائيات">📊</button>
   <button class="backup-btn" type="button" onclick="backup.show()" aria-label="النسخ الاحتياطي">💾</button>
@@ -269,24 +346,39 @@
 
   <div class="container" id="mainContainer">
 
+    <!-- شاشة البداية -->
     <div id="screen-start" class="screen active">
       <div class="card" style="text-align:center; padding-top:40px; padding-bottom:40px;">
         <div style="font-size:70px; margin-bottom:15px; animation:pulse 2s infinite;">💍❤️</div>
         <h1 style="margin:0; font-size:32px;">رحلة حبنا</h1>
         <p style="opacity:0.85; margin:15px 0 30px; line-height:1.8; font-size:16px;">
-          أجمل التواريخ.. وأحلى الذكريات.<br>
-          هل تتذكرين كل التفاصيل يا عمري؟
+          أربع مراحل من الحب والذكريات<br>
+          هل أنتِ مستعدة للرحلة؟
         </p>
+        
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin:20px 0;">
+          <div style="font-size:16px; font-weight:700; margin-bottom:10px;">🎯 المراحل:</div>
+          <div style="font-size:14px; line-height:2; opacity:0.85;" id="phasesPreviewList">
+            جاري التحميل...
+          </div>
+        </div>
+
         <button class="btn" type="button" onclick="game.start()">لنبدأ الرحلة ✨</button>
       </div>
     </div>
 
+    <!-- شاشة اللعبة -->
     <div id="screen-game" class="screen">
+      <div class="phase-indicator">
+        <div class="phase-title" id="phaseTitle">المرحلة 1</div>
+        <div class="phase-subtitle" id="phaseProgress">السؤال 1 من 3</div>
+      </div>
+
       <div class="progress-container">
         <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
         <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.65; margin-top:8px;">
-          <span id="stageCounter">1/12</span>
-          <span onclick="game.restart()" style="cursor:pointer; text-decoration:underline;">البداية</span>
+          <span id="stageCounter">1/15</span>
+          <span onclick="game.restart()" style="cursor:pointer; text-decoration:underline;">إعادة البداية</span>
         </div>
       </div>
 
@@ -309,18 +401,55 @@
       </div>
     </div>
 
+    <!-- شاشة المهمة -->
+    <div id="screen-mission" class="screen">
+      <div class="card">
+        <div class="phase-mission-screen">
+          <div class="mission-icon" id="missionIcon">🎯</div>
+          <div class="mission-title">مبــــروك!</div>
+          <div class="mission-desc" id="missionDesc">
+            أكملتي المرحلة بنجاح! 🎉
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin:20px 0; border: 2px solid var(--mission);">
+          <div style="font-size:18px; font-weight:800; color:var(--mission); margin-bottom:15px; text-align:center;">
+            🎯 المهمة المطلوبة
+          </div>
+          <div style="font-size:16px; line-height:1.8; text-align:center;" id="missionTask">
+            المهمة...
+          </div>
+        </div>
+
+        <div style="background:rgba(255,193,7,0.1); padding:15px; border-radius:10px; margin-bottom:20px; border-right: 4px solid var(--warning);">
+          <p style="margin:0; font-size:14px; opacity:0.9; line-height:1.6;">
+            💡 <strong>تنبيه:</strong> بعد إكمال المهمة، سيظهر لكِ كود سري.<br>
+            أدخلي الكود في المربع أدناه للانتقال للمرحلة التالية.
+          </p>
+        </div>
+
+        <div class="secret-code-box">
+          <div class="code-label">🔐 أدخلي الكود السري هنا:</div>
+          <input type="text" id="secretCodeInput" placeholder="أدخلي الكود..." autocomplete="off">
+        </div>
+
+        <button class="btn btn-mission" type="button" onclick="game.verifySecretCode()">✅ تأكيد الكود والمتابعة</button>
+      </div>
+    </div>
+
+    <!-- شاشة الفوز -->
     <div id="screen-win" class="screen">
       <div class="card" style="text-align:center;">
         <div style="font-size:70px; margin-bottom:10px;">🎁👑</div>
-        <h1 style="color:var(--primary); margin-bottom:10px;">أحلى من يجاوب!</h1>
+        <h1 style="color:var(--primary); margin-bottom:10px;">وصلتي للنهاية!</h1>
         <p style="opacity:0.92; line-height:1.6; font-size:17px;">
-          كل هالتواريخ مهمة، بس وجودك بحياتي هو التاريخ الأهم.<br>
-          وصلتي للكنز يا قلبي.
+          أكملتي جميع المراحل بنجاح 🎉<br>
+          كل هذه الذكريات هي كنزنا الحقيقي
         </p>
 
         <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:16px; margin:25px 0; border:1px dashed rgba(255,255,255,0.3);">
-          <p style="margin:0 0 10px; font-size:14px; opacity:0.75;">الكلمة السرية لفتح الهدية:</p>
-          <h2 style="margin:0; color:var(--success); letter-spacing:1px;">أنا جاهزة للاستلام</h2>
+          <p style="margin:0 0 10px; font-size:14px; opacity:0.75;">الكلمة السرية:</p>
+          <h2 style="margin:0; color:var(--success); letter-spacing:1px;">أنتِ حبي وحياتي</h2>
         </div>
 
         <div class="stats-grid" style="margin:25px 0;">
@@ -329,8 +458,8 @@
             <div class="stat-label">عدد المحاولات</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value" id="winTime">00:00</div>
-            <div class="stat-label">الوقت المستغرق</div>
+            <div class="stat-value" id="winPhases">4</div>
+            <div class="stat-label">المراحل المكتملة</div>
           </div>
         </div>
 
@@ -339,6 +468,7 @@
       </div>
     </div>
 
+    <!-- شاشة الإحصائيات -->
     <div id="screen-stats" class="screen">
       <div class="card">
         <h2 style="margin:0 0 20px 0; color:var(--primary); text-align:center;">📊 الإحصائيات</h2>
@@ -348,7 +478,7 @@
           <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">الإجابات الصحيحة</div></div>
           <div class="stat-card"><div class="stat-value" id="wrongAnswers">0</div><div class="stat-label">الإجابات الخاطئة</div></div>
           <div class="stat-card"><div class="stat-value" id="hintsUsed">0</div><div class="stat-label">التلميحات المستخدمة</div></div>
-          <div class="stat-card"><div class="stat-value" id="totalTime">00:00</div><div class="stat-label">إجمالي الوقت</div></div>
+          <div class="stat-card"><div class="stat-value" id="phasesCompleted">0</div><div class="stat-label">المراحل المكتملة</div></div>
           <div class="stat-card"><div class="stat-value" id="gamesCompleted">0</div><div class="stat-label">الألعاب المكتملة</div></div>
         </div>
 
@@ -357,6 +487,7 @@
       </div>
     </div>
 
+    <!-- شاشة النسخ الاحتياطي -->
     <div id="screen-backup" class="screen">
       <div class="card">
         <h2 style="margin:0 0 20px 0; color:var(--primary); text-align:center;">💾 النسخ الاحتياطي</h2>
@@ -381,46 +512,244 @@
 
   </div>
 
+  <!-- لوحة التحكم -->
   <div id="adminPanel" class="admin-overlay" aria-hidden="true">
     <div class="container">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-        <h2 style="margin:0">🛠 لوحة التحكم</h2>
+        <h2 style="margin:0">🛠 لوحة التحكم المتقدمة</h2>
         <button class="btn-small btn-secondary" type="button" onclick="admin.close()">إغلاق</button>
       </div>
 
       <div style="background:#232336; padding:15px; border-radius:16px; margin-bottom:20px;">
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn-small btn" type="button" onclick="admin.addStage()">+ سؤال</button>
-          <button class="btn-small btn" type="button" onclick="admin.editMotivations()">✏️ رسائل تحفيزية</button>
-          <button class="btn-small btn-secondary" type="button" onclick="admin.exportData()">نسخ</button>
-          <button class="btn-small btn-secondary" type="button" onclick="admin.importData()">لصق</button>
-          <button class="btn-small btn-danger" type="button" onclick="admin.resetFactory()">استعادة الأصلي</button>
+          <button class="btn-small btn" type="button" onclick="admin.addPhase()">+ مرحلة جديدة</button>
+          <button class="btn-small btn-secondary" type="button" onclick="admin.exportData()">📋 نسخ البيانات</button>
+          <button class="btn-small btn-secondary" type="button" onclick="admin.importData()">📄 لصق البيانات</button>
+          <button class="btn-small btn-danger" type="button" onclick="admin.resetFactory()">🔄 استعادة الأصلي</button>
         </div>
       </div>
 
-      <div id="stagesList"></div>
-      <div id="motivationsList" style="display:none;"></div>
+      <div id="phasesPreviewList"></div>
+      
+      <button class="btn" style="margin-top:20px;" onclick="admin.save()">💾 حفظ جميع التغييرات</button>
 
-      <button class="btn" type="button" style="margin-top:20px;" onclick="admin.save()">💾 حفظ التغييرات</button>
+      <button class="btn" type="button" style="margin-top:20px;" onclick="admin.save()">💾 حفظ جميع التغييرات</button>
       <br><br><br>
     </div>
   </div>
 
 <script>
 /* ===========================
-   ✅ Config / Keys / Version
+   الإعدادات الأساسية
 =========================== */
-const APP_VERSION = 7;
+const APP_VERSION = 9;
 const STORAGE = {
-  data: `love_hunt_data_v${APP_VERSION}`,
-  motivations: `love_hunt_motivations_v${APP_VERSION}`,
+  data: `love_hunt_phases_v${APP_VERSION}`,
   progress: `love_hunt_progress_v${APP_VERSION}`,
   stats: `love_hunt_stats_v${APP_VERSION}`,
-  allKeys() { return [this.data, this.motivations, this.progress, this.stats]; }
+  allKeys() { return [this.data, this.progress, this.stats]; }
+};
+
+const ADMIN_PASSWORD = "1992";
+// كلمة المرور البسيطة: 1992
+
+/* ===========================
+   البيانات الافتراضية
+=========================== */
+const DEFAULT_PHASES = [
+  {
+    id: 1,
+    name: "يلا نسخن مع بعض",
+    icon: "🔥",
+    mission: {
+      icon: "📸",
+      description: "التقطي صورة سيلفي وأنتِ تبتسمين بأجمل ابتسامة 😊",
+      task: "صوري نفسك وأرسلي الصورة",
+      secretCode: "ابتسامتك نور"
+    },
+    questions: [
+      {
+        title: "السؤال الأول",
+        type: "choice",
+        prompt: "ما هو لونك المفضل؟",
+        answer: "أزرق",
+        options: "أحمر,أزرق,أخضر,أصفر",
+        hint: "لون السماء والبحر...",
+        task: "اختاري الإجابة الصحيحة",
+        successMsg: "ممتاز! بداية رائعة 🎉",
+        img: ""
+      },
+      {
+        title: "السؤال الثاني",
+        type: "text",
+        prompt: "ما هو اسم أول مطعم ذهبنا له سوياً؟",
+        answer: "ماكدونالدز",
+        hint: "مطعم وجبات سريعة مشهور...",
+        task: "اكتبي اسم المطعم",
+        successMsg: "صحيح! ذكرى جميلة 😍",
+        img: ""
+      },
+      {
+        title: "السؤال الثالث",
+        type: "pin4",
+        prompt: "في أي سنة التقينا؟\nمثال: 2022",
+        answer: "2022",
+        hint: "في بداية العشرينات...",
+        task: "أدخلي السنة",
+        successMsg: "رائع! أجمل لقاء ❤️",
+        img: ""
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "الكنز المفقود",
+    icon: "🗺️",
+    mission: {
+      icon: "💎",
+      description: "ابحثي عن شيء أحمر في الغرفة وصوريه 📷",
+      task: "اعثري على شيء أحمر وصوريه",
+      secretCode: "الكنز الأحمر"
+    },
+    questions: [
+      {
+        title: "البحث عن الكنز - 1",
+        type: "choice",
+        prompt: "ما هي هوايتي المفضلة؟",
+        answer: "القراءة",
+        options: "الرياضة,القراءة,الطبخ,الرسم",
+        hint: "أحب الكتب...",
+        task: "اختاري الهواية الصحيحة",
+        successMsg: "ممتاز! تعرفيني جيداً 📚",
+        img: ""
+      },
+      {
+        title: "البحث عن الكنز - 2",
+        type: "text",
+        prompt: "ما هو لقبي المفضل الذي تناديني به؟",
+        answer: "حبيبي",
+        hint: "كلمة حب...",
+        task: "اكتبي اللقب",
+        successMsg: "دائماً في قلبي 💕",
+        img: ""
+      },
+      {
+        title: "البحث عن الكنز - 3",
+        type: "choice",
+        prompt: "كم مرة قلت لكِ 'أحبك' في أول يوم؟",
+        answer: "10",
+        options: "3,5,10,20",
+        hint: "رقم مكون من خانتين...",
+        task: "خمني العدد",
+        successMsg: "ولا يزال العدد يزداد! 😊",
+        img: ""
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "حبي وحياتي وقلبي",
+    icon: "❤️",
+    mission: {
+      icon: "💌",
+      description: "اكتبي رسالة حب قصيرة (3 أسطر على الأقل) وارسليها ✍️",
+      task: "عبري عن مشاعرك في رسالة",
+      secretCode: "رسالة القلب"
+    },
+    questions: [
+      {
+        title: "من أعماق القلب - 1",
+        type: "text",
+        prompt: "أكملي الجملة: أنا أحبك أكثر من...",
+        answer: "نفسي",
+        hint: "كلمة من 4 حروف...",
+        task: "أكملي الجملة",
+        successMsg: "وأنا أحبك أكثر من كل شيء ❤️",
+        img: ""
+      },
+      {
+        title: "من أعماق القلب - 2",
+        type: "choice",
+        prompt: "ما هو أجمل شيء فيكِ من وجهة نظري؟",
+        answer: "ابتسامتك",
+        options: "عيونك,ابتسامتك,ضحكتك,صوتك",
+        hint: "تضيء وجهك...",
+        task: "اختاري الإجابة",
+        successMsg: "ابتسامتك تنور الدنيا 😊",
+        img: ""
+      },
+      {
+        title: "من أعماق القلب - 3",
+        type: "text",
+        prompt: "ما هي الأغنية التي تذكرك بنا؟",
+        answer: "أحبك",
+        hint: "اسم بسيط وواضح...",
+        task: "اكتبي اسم الأغنية",
+        successMsg: "أغنيتنا الخاصة 🎵",
+        img: ""
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: "لنصل مع بعض",
+    icon: "🎯",
+    mission: {
+      icon: "🎁",
+      description: "سجلي مقطع فيديو قصير (10 ثواني) وأنتِ تقولين: أحبك 💕",
+      task: "سجلي فيديو قصير",
+      secretCode: "معاً للأبد"
+    },
+    questions: [
+      {
+        title: "الوصول للنهاية - 1",
+        type: "choice",
+        prompt: "ما هو حلمنا المشترك؟",
+        answer: "بيت أحلامنا",
+        options: "السفر,بيت أحلامنا,العائلة,الثروة",
+        hint: "مكان نعيش فيه سوياً...",
+        task: "اختاري حلمنا",
+        successMsg: "سنحققه سوياً إن شاء الله 🏡",
+        img: ""
+      },
+      {
+        title: "الوصول للنهاية - 2",
+        type: "text",
+        prompt: "أين تريدين أن نذهب في شهر العسل؟",
+        answer: "المالديف",
+        hint: "جزر استوائية...",
+        task: "اكتبي الوجهة",
+        successMsg: "وجهة أحلامنا! 🏝️",
+        img: ""
+      },
+      {
+        title: "الوصول للنهاية - 3",
+        type: "text",
+        prompt: "ما هي الكلمة السحرية لإنهاء اللعبة؟\nالتلميح: أنتِ ___ و ____",
+        answer: "حبي وحياتي",
+        hint: "أنتِ...",
+        task: "اكتبي الكلمة السحرية",
+        successMsg: "مبروك! وصلتِ للنهاية! 🎉👑",
+        img: ""
+      }
+    ]
+  }
+];
+
+let phases = [];
+let currentPhaseIdx = 0;
+let currentQuestionIdx = 0;
+let gameStats = {
+  totalAttempts: 0,
+  correctAnswers: 0,
+  wrongAnswers: 0,
+  hintsUsed: 0,
+  phasesCompleted: 0,
+  gamesCompleted: 0
 };
 
 /* ===========================
-   🔐 Helpers (Escape + Admin PIN hash)
+   الدوال المساعدة
 =========================== */
 function escapeHTML(str) {
   return String(str ?? '')
@@ -431,75 +760,11 @@ function escapeHTML(str) {
     .replace(/'/g, '&#39;');
 }
 
-const ADMIN_PIN_HASH = "6bfefd82c23dd6030bf505daa3cb5c55c7d1a294c0b483a724bccdc8a73577b6";
-const ADMIN_SALT = "love_hunt_admin_v7:";
+// تم إزالة دالة sha256Hex - لم نعد بحاجة لها مع كلمة المرور البسيطة
 
-async function sha256Hex(input) {
-  if (!window.crypto?.subtle) return null;
-  const enc = new TextEncoder();
-  const data = enc.encode(input);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 /* ===========================
-   🎮 Default Data
-=========================== */
-const DEFAULT_DATA = [
-  { title: "1. البداية 👶🏻", type: "pin4", prompt: "في أي سنة نوّر حبيبك الدنيا؟\n(سنة الميلاد)", answer: "1992", hint: "التسعينات..", task: "ارسلي صورتي وانا صغير اذا عندك (أو ايموجي طفل)", successMsg: "العمر كله يا رب ❤️" },
-  { title: "2. أول تواصل 📱", type: "pin4", prompt: "متى كان أول تواصل بينا؟\nاكتبي اليوم والشهر (يوم 13 شهر 4).\nمثال: 1304", answer: "1304", hint: "شهر أبريل.. يوم 13", task: "صوري الشاشة الحين وارسليها لي 😉", successMsg: "ما نسيتي! يا زين الذاكرة 😍" },
-  { title: "3. كلمات لا تُنسى 💬", type: "text", prompt: "وش هي أول جملة قلتها لك بعد رد السلام؟", answer: "ياهلا والله وسهلا ومرحبا", hint: "فيها ترحيب قوي (ياهلا...)", task: "سجلي فويس وقوليها بنفس نبرتي 😂", successMsg: "صح! كانت من كل قلبي والله 🤍" },
-  { title: "4. يوم الارتباط (العقد) 💍", type: "pin4", prompt: "تاريخ عقد قراننا (الملكة).\nيوم 24 شهر 10.\nاكتبيها: 2410", answer: "2410", hint: "شهر أكتوبر", task: "بوسة على الهواء 😘", successMsg: "يوم صرتي حلالي 💍" },
-  { title: "5. ذكرى شقيّة 😉", type: "pin4", prompt: "تتذكرين تاريخ أول 'قبصة'؟ 😂\nيوم 25 شهر 10.\nاكتبي: 2510", answer: "2510", hint: "بعد العقد بيوم واحد بس", task: "ارسلي إيموجي يضحك 😂", successMsg: "أحلى ذكرى وأحلى قبصة 😂❤️" },
-  { title: "6. اليوم المنتظر 👰🏻‍♀️", type: "pin4", prompt: "متى موعد زواجنا إن شاء الله؟\nيوم 17 شهر 4.\nاكتبي: 1704", answer: "1704", hint: "سنة 2026.. شهر أبريل", task: "دعوة حلوة من قلبك لنا", successMsg: "يا رب تمم لنا على خير 🤲🏻" },
-  { title: "7. شهر العسل ✈️", type: "pin4", prompt: "متى تاريخ سفرتنا؟\nيوم 20 شهر 4.\nاكتبي: 2004", answer: "2004", hint: "بعد الزواج بـ 3 أيام", task: "جهزي الشنطة (مجازياً) وارمزي بطيارة ✈️", successMsg: "بنطير لسابع سما من الفرحة ☁️" },
-  { title: "8. تفاصيل الاسم 🔢", type: "choice", prompt: "كم عدد حروف اسم حبيبك؟", answer: "5", options: "4,5,6,7", hint: "س ل ي ...", task: "اكتبي اسمي مزخرف", successMsg: "يا حلو اسمي وانتي تختارينه" },
-  { title: "9. معادلة حبنا ➕", type: "choice", prompt: "إذا جمعنا عدد حروف اسمك مع عدد حروف اسمي.. كم يطلع الناتج؟", answer: "9", options: "8,9,10,11", hint: "حروفي 5.. وحروفك 4", task: "ارسمي قلب واكتبي داخله رقم 9", successMsg: "رقم الكمال والحب ❤️" },
-  { title: "10. الأرشيف 📔", type: "text", prompt: "كيف قررنا نسجل ذكرياتنا ولحظاتنا الحلوة؟", answer: "بالدفتر", hint: "شيء نكتب فيه...", task: "اكتبي: أحبك في الدفتر وصوريها", successMsg: "عشان تبقى للعمر كله 📝" },
-  { title: "11. الرمز الخاص ♥️", type: "text", prompt: "وش الرمز (الإيموجي) اللي خصصته لك لحالك؟\n(انسخيه والصقيه)", answer: "♥️", hint: "القلب الأحمر الغامق: ♥️", task: "أرسلي الرمز لي الحين", successMsg: "أنتِ القلب كله ♥️" },
-  { title: "النهاية 🎁", type: "text", prompt: "عشان تفتحين الكنز.. اكتبي الجملة السحرية:\nأنا جاهزة للاستلام", answer: "أنا جاهزة للاستلام", hint: "بدون أي تغيير", task: "استعدي!!", successMsg: "ألف مبروك يا روحي! 🎉" }
-];
-
-const DEFAULT_MOTIVATIONS = [
-  { after: 3, message: "💪 رائع! 3 إجابات صحيحة.. استمري يا بطلة!" },
-  { after: 6, message: "🔥 نصف الطريق! ذاكرتك خيالية يا عمري" },
-  { after: 9, message: "⭐ تسعة من اثني عشر! أنتِ أسطورة!" }
-];
-
-let stages = [];
-let motivations = [];
-let currentStageIdx = 0;
-
-let gameStats = {
-  totalAttempts: 0,
-  correctAnswers: 0,
-  wrongAnswers: 0,
-  hintsUsed: 0,
-  gamesCompleted: 0,
-  totalTimeSeconds: 0,
-  currentSessionStart: null
-};
-
-/* ===========================
-   🌐 Connection Monitor
-=========================== */
-const connection = {
-  init() {
-    window.addEventListener('online', () => this.update(true));
-    window.addEventListener('offline', () => this.update(false));
-    this.update(navigator.onLine);
-  },
-  update(isOnline) {
-    const el = document.getElementById('connectionStatus');
-    if (!el) return;
-    if (isOnline) el.classList.remove('offline');
-    else el.classList.add('offline');
-  }
-};
-
-/* ===========================
-   🎨 UI helpers
+   واجهة المستخدم
 =========================== */
 const ui = {
   toast(msg, type = 'normal') {
@@ -526,26 +791,11 @@ const ui = {
       document.body.appendChild(el);
       setTimeout(() => el.remove(), 3200);
     }
-  },
-  showMotivation(msg) {
-    const el = document.createElement('div');
-    el.className = 'motivation-msg';
-    el.innerHTML = `
-      <div style="font-size:50px; margin-bottom:15px;">🎉</div>
-      <p id="motMsg" style="margin:0; font-size:18px; line-height:1.6;"></p>
-    `;
-    document.body.appendChild(el);
-    el.querySelector('#motMsg').textContent = String(msg ?? '');
-    requestAnimationFrame(() => el.classList.add('show'));
-    setTimeout(() => {
-      el.classList.add('hide');
-      setTimeout(() => el.remove(), 300);
-    }, 3000);
   }
 };
 
 /* ===========================
-   📊 Stats
+   الإحصائيات
 =========================== */
 const stats = {
   load() {
@@ -563,34 +813,37 @@ const stats = {
     document.getElementById('correctAnswers').innerText = gameStats.correctAnswers;
     document.getElementById('wrongAnswers').innerText = gameStats.wrongAnswers;
     document.getElementById('hintsUsed').innerText = gameStats.hintsUsed;
-    document.getElementById('totalTime').innerText = game.formatTime(gameStats.totalTimeSeconds);
+    document.getElementById('phasesCompleted').innerText = gameStats.phasesCompleted;
     document.getElementById('gamesCompleted').innerText = gameStats.gamesCompleted;
     game.showScreen('screen-stats');
   },
   close() {
-    if (currentStageIdx > 0 && currentStageIdx < stages.length) game.showScreen('screen-game');
-    else game.showScreen('screen-start');
+    const currentPhase = phases[currentPhaseIdx];
+    if (currentPhase && currentQuestionIdx < currentPhase.questions.length) {
+      game.showScreen('screen-game');
+    } else {
+      game.showScreen('screen-start');
+    }
   },
   reset() {
     if (!confirm("متأكدة من حذف كل الإحصائيات؟")) return;
     gameStats = {
       totalAttempts: 0, correctAnswers: 0, wrongAnswers: 0, hintsUsed: 0,
-      gamesCompleted: 0, totalTimeSeconds: 0, currentSessionStart: null
+      phasesCompleted: 0, gamesCompleted: 0
     };
     this.save();
     this.show();
     ui.toast("تم إعادة تعيين الإحصائيات", "success");
   },
   share() {
-    const text = `🎮 أنهيت لعبة "رحلة حبنا" 💍❤️
+    const text = `🎮 أنهيت لعبة "رحلة حبنا" - 4 مراحل 💍❤️
 
 📊 إحصائياتي:
 • المحاولات: ${gameStats.totalAttempts}
 • الإجابات الصحيحة: ${gameStats.correctAnswers}
-• الوقت: ${game.formatTime(gameStats.totalTimeSeconds)}
-• الألعاب المكتملة: ${gameStats.gamesCompleted}
+• المراحل المكتملة: ${gameStats.phasesCompleted}
 
-✨ ذاكرتي قوية والحب أقوى!`;
+✨ الحب ينتصر دائماً!`;
 
     if (navigator.share) {
       navigator.share({ title: 'رحلة حبنا', text }).catch(() => this.copyToClipboard(text));
@@ -610,22 +863,25 @@ const stats = {
 };
 
 /* ===========================
-   💾 Backup (export/import)
+   النسخ الاحتياطي
 =========================== */
 const backup = {
   show() { game.showScreen('screen-backup'); },
   close() {
-    if (currentStageIdx > 0 && currentStageIdx < stages.length) game.showScreen('screen-game');
-    else game.showScreen('screen-start');
+    const currentPhase = phases[currentPhaseIdx];
+    if (currentPhase && currentQuestionIdx < currentPhase.questions.length) {
+      game.showScreen('screen-game');
+    } else {
+      game.showScreen('screen-start');
+    }
   },
   export() {
     try {
       const data = {
         appVersion: APP_VERSION,
         timestamp: Date.now(),
-        stages,
-        motivations,
-        progress: currentStageIdx,
+        phases,
+        progress: { phaseIdx: currentPhaseIdx, questionIdx: currentQuestionIdx },
         stats: gameStats
       };
       const jsonStr = JSON.stringify(data, null, 2);
@@ -656,17 +912,17 @@ const backup = {
       reader.onload = (event) => {
         try {
           const data = JSON.parse(event.target.result);
-          if (!data || !data.stages || !Array.isArray(data.stages)) throw new Error("Bad file");
+          if (!data || !data.phases || !Array.isArray(data.phases)) throw new Error("Bad file");
 
-          stages = data.stages;
-          motivations = Array.isArray(data.motivations) ? data.motivations : DEFAULT_MOTIVATIONS;
-          currentStageIdx = Number.isFinite(data.progress) ? data.progress : 0;
+          phases = data.phases;
+          if (data.progress) {
+            currentPhaseIdx = data.progress.phaseIdx || 0;
+            currentQuestionIdx = data.progress.questionIdx || 0;
+          }
+          if (data.stats) Object.assign(gameStats, data.stats);
 
-          if (data.stats && typeof data.stats === 'object') Object.assign(gameStats, data.stats);
-
-          localStorage.setItem(STORAGE.data, JSON.stringify(stages));
-          localStorage.setItem(STORAGE.motivations, JSON.stringify(motivations));
-          localStorage.setItem(STORAGE.progress, String(currentStageIdx));
+          localStorage.setItem(STORAGE.data, JSON.stringify(phases));
+          localStorage.setItem(STORAGE.progress, JSON.stringify({ phaseIdx: currentPhaseIdx, questionIdx: currentQuestionIdx }));
           stats.save();
 
           ui.toast("✅ تم الاستيراد بنجاح!", "success");
@@ -683,114 +939,151 @@ const backup = {
 };
 
 /* ===========================
-   🎮 Game Logic
+   منطق اللعبة
 =========================== */
 const game = {
   init() {
-    connection.init();
-
     try {
       const savedData = localStorage.getItem(STORAGE.data);
-      stages = savedData ? JSON.parse(savedData) : JSON.parse(JSON.stringify(DEFAULT_DATA));
-
-      const savedMot = localStorage.getItem(STORAGE.motivations);
-      motivations = savedMot ? JSON.parse(savedMot) : JSON.parse(JSON.stringify(DEFAULT_MOTIVATIONS));
+      phases = savedData ? JSON.parse(savedData) : JSON.parse(JSON.stringify(DEFAULT_PHASES));
 
       const savedProgress = localStorage.getItem(STORAGE.progress);
-      if (savedProgress !== null) currentStageIdx = parseInt(savedProgress, 10) || 0;
+      if (savedProgress) {
+        const progress = JSON.parse(savedProgress);
+        currentPhaseIdx = progress.phaseIdx || 0;
+        currentQuestionIdx = progress.questionIdx || 0;
+      }
 
       stats.load();
 
-      if (currentStageIdx > 0 && currentStageIdx < stages.length) {
-        this.showScreen('screen-game');
-        this.render();
-        if (!gameStats.currentSessionStart) gameStats.currentSessionStart = Date.now();
+      // تحديث قائمة المراحل في الشاشة الرئيسية
+      this.updatePhasesList();
+
+      if (currentPhaseIdx > 0 || currentQuestionIdx > 0) {
+        const currentPhase = phases[currentPhaseIdx];
+        if (currentPhase && currentQuestionIdx < currentPhase.questions.length) {
+          this.showScreen('screen-game');
+          this.render();
+        }
       }
       this.updateBackButton();
     } catch (e) {
       console.error("Initialization Error:", e);
-      alert("حدث خطأ في تحميل اللعبة. سيتم إعادة تعيين البيانات.");
-      this.resetOnlyOurKeys();
+      this.resetProgress();
       location.reload();
     }
-
-    this.registerServiceWorker();
   },
 
-  resetOnlyOurKeys() {
+  updatePhasesList() {
+    const listEl = document.getElementById('phasesPreviewList');
+    if (!listEl) return;
+    
+    let html = '';
+    phases.forEach((phase, idx) => {
+      html += `${phase.icon} ${idx + 1}. ${escapeHTML(phase.name)}<br>`;
+    });
+    listEl.innerHTML = html;
+  },
+
+  resetProgress() {
     STORAGE.allKeys().forEach(k => localStorage.removeItem(k));
-  },
-
-  async registerServiceWorker() {
-    try {
-      if ('serviceWorker' in navigator) {
-        await navigator.serviceWorker.register('./sw.js', { scope: './' });
-      }
-    } catch (e) {
-      console.warn("SW register failed:", e);
-    }
+    currentPhaseIdx = 0;
+    currentQuestionIdx = 0;
+    gameStats = {
+      totalAttempts: 0,
+      correctAnswers: 0,
+      wrongAnswers: 0,
+      hintsUsed: 0,
+      phasesCompleted: 0,
+      gamesCompleted: 0
+    };
   },
 
   start() {
-    currentStageIdx = 0;
+    currentPhaseIdx = 0;
+    currentQuestionIdx = 0;
     this.saveProgress();
     this.showScreen('screen-game');
     this.render();
     this.updateBackButton();
-    gameStats.currentSessionStart = Date.now();
   },
 
   restart(full = false) {
     if (full || confirm("متأكدة تبين تعيدين من البداية؟")) {
-      currentStageIdx = 0;
-      this.saveProgress();
+      this.resetProgress();
       this.showScreen('screen-start');
       this.updateBackButton();
-      gameStats.currentSessionStart = null;
     }
   },
 
   goBack() {
-    if (currentStageIdx > 0) {
-      currentStageIdx--;
-      this.saveProgress();
-      this.render();
-      this.updateBackButton();
+    if (currentQuestionIdx > 0) {
+      currentQuestionIdx--;
+    } else if (currentPhaseIdx > 0) {
+      currentPhaseIdx--;
+      const prevPhase = phases[currentPhaseIdx];
+      currentQuestionIdx = prevPhase.questions.length - 1;
     }
+    this.saveProgress();
+    this.render();
+    this.updateBackButton();
   },
 
   updateBackButton() {
     const btn = document.getElementById('backBtn');
     const inGame = document.getElementById('screen-game').classList.contains('active');
-    if (currentStageIdx > 0 && inGame) btn.classList.add('visible');
-    else btn.classList.remove('visible');
+    if ((currentPhaseIdx > 0 || currentQuestionIdx > 0) && inGame) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
   },
 
   render() {
-    const data = stages[currentStageIdx];
-    if (!data) return;
+    const phase = phases[currentPhaseIdx];
+    if (!phase) return;
 
-    document.getElementById('stageTitle').innerText = data.title;
-    document.getElementById('stageCounter').innerText = `${currentStageIdx + 1} / ${stages.length}`;
-    document.getElementById('stagePrompt').innerText = data.prompt;
-    document.getElementById('stageTask').innerText = data.task || "استمري بحبك ❤️";
+    const question = phase.questions[currentQuestionIdx];
+    if (!question) return;
 
+    // تحديث معلومات المرحلة
+    document.getElementById('phaseTitle').innerHTML = `${phase.icon} المرحلة ${currentPhaseIdx + 1}: ${phase.name}`;
+    document.getElementById('phaseProgress').innerText = `السؤال ${currentQuestionIdx + 1} من ${phase.questions.length}`;
+
+    // حساب التقدم الإجمالي
+    let totalQuestions = 0;
+    let completedQuestions = 0;
+    phases.forEach((p, pIdx) => {
+      totalQuestions += p.questions.length;
+      if (pIdx < currentPhaseIdx) {
+        completedQuestions += p.questions.length;
+      } else if (pIdx === currentPhaseIdx) {
+        completedQuestions += currentQuestionIdx;
+      }
+    });
+
+    document.getElementById('stageTitle').innerText = question.title;
+    document.getElementById('stageCounter').innerText = `${completedQuestions + 1} / ${totalQuestions}`;
+    document.getElementById('stagePrompt').innerText = question.prompt;
+    document.getElementById('stageTask').innerText = question.task || "أجيبي على السؤال";
+
+    // الصورة
     const imgEl = document.getElementById('stageImg');
-    if (data.img && String(data.img).trim() !== "") {
-      imgEl.src = data.img;
+    if (question.img && String(question.img).trim() !== "") {
+      imgEl.src = question.img;
       imgEl.style.display = "block";
     } else {
       imgEl.style.display = "none";
       imgEl.removeAttribute('src');
     }
 
-    const pct = ((currentStageIdx + 1) / stages.length) * 100;
+    const pct = ((completedQuestions + 1) / totalQuestions) * 100;
     document.getElementById('progressBar').style.width = `${pct}%`;
 
     const container = document.getElementById('inputContainer');
     container.innerHTML = '';
 
-    if (data.type === 'text') {
+    if (question.type === 'text') {
       container.innerHTML = `<input type="text" id="ansInput" placeholder="اكتبي الإجابة هنا..." autocomplete="off">`;
       setTimeout(() => {
         const inp = document.getElementById('ansInput');
@@ -800,8 +1093,8 @@ const game = {
         }
       }, 50);
     }
-    else if (data.type === 'choice') {
-      const opts = String(data.options || '').split(',').map(s => s.trim()).filter(Boolean);
+    else if (question.type === 'choice') {
+      const opts = String(question.options || '').split(',').map(s => s.trim()).filter(Boolean);
       const grid = document.createElement('div');
       grid.className = 'options-grid';
 
@@ -820,8 +1113,8 @@ const game = {
       container.appendChild(grid);
       container.appendChild(hidden);
     }
-    else if (String(data.type).startsWith('pin')) {
-      const len = data.type === 'pin3' ? 3 : 4;
+    else if (String(question.type).startsWith('pin')) {
+      const len = question.type === 'pin3' ? 3 : 4;
       const grid = document.createElement('div');
       grid.className = 'pin-grid';
 
@@ -842,22 +1135,7 @@ const game = {
 
   setupPinLogic(len) {
     const inputs = document.querySelectorAll('.pin-input');
-    if (inputs[0]) {
-      inputs[0].focus();
-      inputs[0].addEventListener('paste', (e) => {
-        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
-        const digits = text.replace(/\D/g, '').slice(0, len);
-        if (digits.length === len) {
-          e.preventDefault();
-          for (let i = 0; i < len; i++) {
-            const el = document.getElementById(`p${i}`);
-            if (el) el.value = digits[i];
-          }
-          const last = document.getElementById(`p${len-1}`);
-          if (last) last.focus();
-        }
-      });
-    }
+    if (inputs[0]) inputs[0].focus();
 
     inputs.forEach((input, idx) => {
       input.addEventListener('input', (e) => {
@@ -879,10 +1157,11 @@ const game = {
   },
 
   check() {
-    const data = stages[currentStageIdx];
+    const phase = phases[currentPhaseIdx];
+    const question = phase.questions[currentQuestionIdx];
     let userAns = "";
 
-    if (String(data.type).startsWith('pin')) {
+    if (String(question.type).startsWith('pin')) {
       document.querySelectorAll('.pin-input').forEach(i => userAns += i.value);
     } else {
       const inp = document.getElementById('ansInput');
@@ -890,24 +1169,24 @@ const game = {
     }
 
     if (!userAns) {
-      ui.toast("⚠️ لا تستعجلين.. جاوبي أول!", "error");
+      ui.toast("⚠️ من فضلك أجيبي على السؤال أولاً!", "error");
       return;
     }
 
     gameStats.totalAttempts++;
 
     const cleanUser = this.normalize(userAns);
-    const cleanCorrect = this.normalize(data.answer);
+    const cleanCorrect = this.normalize(question.answer);
 
     const isCorrect = (cleanUser === cleanCorrect);
 
     if (isCorrect) {
       gameStats.correctAnswers++;
-      this.handleSuccess(data);
+      this.handleSuccess(question);
     } else {
       gameStats.wrongAnswers++;
       stats.save();
-      ui.toast("❌ خطأ.. حاولي تتذكرين 😉", "error");
+      ui.toast("❌ إجابة خاطئة.. حاولي مرة أخرى", "error");
       if (navigator.vibrate) navigator.vibrate(200);
     }
   },
@@ -922,59 +1201,116 @@ const game = {
       .replace(/ى/g, 'ي');
   },
 
-  handleSuccess(data) {
-    ui.toast(data.successMsg || "✅ إجابة صحيحة!", "success");
+  handleSuccess(question) {
+    ui.toast(question.successMsg || "✅ إجابة صحيحة!", "success");
     ui.confetti();
     stats.save();
 
     setTimeout(() => {
-      currentStageIdx++;
+      currentQuestionIdx++;
       this.saveProgress();
-      this.checkMotivation();
 
-      if (currentStageIdx >= stages.length) this.completeGame();
-      else { this.render(); this.updateBackButton(); }
+      const phase = phases[currentPhaseIdx];
+      
+      // التحقق من نهاية المرحلة
+      if (currentQuestionIdx >= phase.questions.length) {
+        // انتهت المرحلة، عرض المهمة
+        this.showMission();
+      } else {
+        // السؤال التالي
+        this.render();
+        this.updateBackButton();
+      }
     }, 900);
   },
 
-  checkMotivation() {
-    motivations.forEach(mot => {
-      if (gameStats.correctAnswers === mot.after) ui.showMotivation(mot.message);
-    });
+  showMission() {
+    const phase = phases[currentPhaseIdx];
+    
+    document.getElementById('missionIcon').innerText = phase.mission.icon;
+    document.getElementById('missionDesc').innerHTML = `
+      أكملتي ${phase.icon} <strong>${phase.name}</strong> بنجاح! 🎉<br>
+      ${currentPhaseIdx < phases.length - 1 ? 'الآن يجب إكمال المهمة للانتقال للمرحلة التالية' : 'مهمة أخيرة قبل النهاية!'}
+    `;
+    document.getElementById('missionTask').innerText = phase.mission.description;
+
+    // مسح حقل الكود
+    const codeInput = document.getElementById('secretCodeInput');
+    if (codeInput) codeInput.value = '';
+
+    this.showScreen('screen-mission');
+  },
+
+  verifySecretCode() {
+    const phase = phases[currentPhaseIdx];
+    const codeInput = document.getElementById('secretCodeInput');
+    const userCode = codeInput ? codeInput.value : '';
+
+    if (!userCode.trim()) {
+      ui.toast("⚠️ من فضلك أدخلي الكود السري!", "error");
+      return;
+    }
+
+    const cleanUser = this.normalize(userCode);
+    const cleanCorrect = this.normalize(phase.mission.secretCode);
+
+    if (cleanUser === cleanCorrect) {
+      ui.toast("✅ الكود صحيح! مبروك!", "success");
+      ui.confetti();
+      
+      gameStats.phasesCompleted++;
+      stats.save();
+
+      setTimeout(() => {
+        currentPhaseIdx++;
+        currentQuestionIdx = 0;
+        this.saveProgress();
+
+        // التحقق من نهاية اللعبة
+        if (currentPhaseIdx >= phases.length) {
+          this.completeGame();
+        } else {
+          this.showScreen('screen-game');
+          this.render();
+          this.updateBackButton();
+        }
+      }, 1000);
+    } else {
+      gameStats.wrongAnswers++;
+      stats.save();
+      ui.toast("❌ الكود خاطئ! حاولي مرة أخرى", "error");
+      if (navigator.vibrate) navigator.vibrate(200);
+    }
   },
 
   completeGame() {
     gameStats.gamesCompleted++;
-
-    if (gameStats.currentSessionStart) {
-      const timeSpent = Math.floor((Date.now() - gameStats.currentSessionStart) / 1000);
-      gameStats.totalTimeSeconds += timeSpent;
-      gameStats.currentSessionStart = null;
-
-      document.getElementById('winAttempts').innerText = gameStats.totalAttempts;
-      document.getElementById('winTime').innerText = this.formatTime(timeSpent);
-    }
-
     stats.save();
+
+    document.getElementById('winAttempts').innerText = gameStats.totalAttempts;
+    document.getElementById('winPhases').innerText = phases.length;
+
     this.showScreen('screen-win');
   },
 
-  formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  },
-
   showHint() {
-    const data = stages[currentStageIdx];
+    const phase = phases[currentPhaseIdx];
+    const question = phase.questions[currentQuestionIdx];
     gameStats.hintsUsed++;
     stats.save();
-    ui.toast("💡 " + (data.hint || "لا يوجد تلميح"), "success");
+    ui.toast("💡 " + (question.hint || "لا يوجد تلميح"), "success");
   },
 
   saveProgress() {
-    try { localStorage.setItem(STORAGE.progress, String(currentStageIdx)); }
-    catch (e) { console.warn("Failed to save progress:", e); }
+    try {
+      const progress = {
+        phaseIdx: currentPhaseIdx,
+        questionIdx: currentQuestionIdx
+      };
+      localStorage.setItem(STORAGE.progress, JSON.stringify(progress));
+    } catch (e) {
+      console.warn("Failed to save progress:", e);
+    }
   },
 
   showScreen(id) {
@@ -986,187 +1322,285 @@ const game = {
 };
 
 /* ===========================
-   🛠 Admin Panel (minimal)
+   لوحة التحكم
 =========================== */
 const admin = {
-  toggleAccordion(idx) {
-    document.querySelectorAll('.stage-editor').forEach((el, i) => {
+  togglePhaseAccordion(idx) {
+    document.querySelectorAll('.phase-editor').forEach((el, i) => {
       if (i === idx) el.classList.toggle('open');
       else el.classList.remove('open');
     });
   },
 
-  renderList() {
-    const list = document.getElementById('stagesList');
-    list.innerHTML = '';
-    list.style.display = 'block';
-    document.getElementById('motivationsList').style.display = 'none';
+  toggleQuestionAccordion(phaseIdx, qIdx) {
+    const phaseEditor = document.querySelectorAll('.phase-editor')[phaseIdx];
+    if (!phaseEditor) return;
+    
+    const questionEditors = phaseEditor.querySelectorAll('.stage-editor');
+    questionEditors.forEach((el, i) => {
+      if (i === qIdx) el.classList.toggle('open');
+      else el.classList.remove('open');
+    });
+  },
 
-    stages.forEach((s, idx) => {
+  renderList() {
+    const list = document.getElementById('adminPhasesList');
+    list.innerHTML = '';
+
+    phases.forEach((phase, phaseIdx) => {
+      const div = document.createElement('div');
+      div.className = 'phase-editor';
+      
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'phase-header';
+      headerDiv.innerHTML = `
+        <span>${phase.icon} ${escapeHTML(phaseIdx + 1)}. ${escapeHTML(phase.name)}</span>
+        <span style="font-size:11px; opacity:0.7">${phase.questions.length} أسئلة</span>
+      `;
+      headerDiv.addEventListener('click', () => this.togglePhaseAccordion(phaseIdx));
+      
+      const bodyDiv = document.createElement('div');
+      bodyDiv.className = 'phase-body';
+      
+      // معلومات المرحلة
+      bodyDiv.innerHTML = `
+        <label style="font-weight:700; color:var(--primary)">اسم المرحلة</label>
+        <input type="text" value="${escapeHTML(phase.name)}" data-phase="${phaseIdx}" data-key="name">
+        
+        <label style="font-weight:700; color:var(--primary)">أيقونة المرحلة</label>
+        <input type="text" value="${escapeHTML(phase.icon)}" data-phase="${phaseIdx}" data-key="icon" placeholder="مثال: 🔥">
+        
+        <div class="mission-editor">
+          <h4 style="margin:0 0 10px 0; color:var(--mission);">🎯 مهمة المرحلة</h4>
+          
+          <label>أيقونة المهمة</label>
+          <input type="text" value="${escapeHTML(phase.mission.icon)}" data-phase="${phaseIdx}" data-mission="icon" placeholder="مثال: 📸">
+          
+          <label>وصف المهمة</label>
+          <textarea rows="2" data-phase="${phaseIdx}" data-mission="description">${escapeHTML(phase.mission.description)}</textarea>
+          
+          <label>النص المختصر</label>
+          <input type="text" value="${escapeHTML(phase.mission.task)}" data-phase="${phaseIdx}" data-mission="task">
+          
+          <label style="font-weight:800; color:var(--warning)">🔐 الكود السري للمهمة</label>
+          <input type="text" value="${escapeHTML(phase.mission.secretCode)}" data-phase="${phaseIdx}" data-mission="secretCode" placeholder="الكود السري..." style="background:rgba(255,193,7,0.1); border-color:var(--warning);">
+        </div>
+        
+        <div style="margin:20px 0; padding-top:15px; border-top:2px solid rgba(255,255,255,0.1);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h4 style="margin:0; color:var(--primary);">📝 أسئلة المرحلة</h4>
+            <button class="btn-small btn" type="button" onclick="admin.addQuestion(${phaseIdx})">+ سؤال جديد</button>
+          </div>
+          <div id="questions-${phaseIdx}"></div>
+        </div>
+        
+        <div style="margin-top:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn-small btn-secondary" type="button" onclick="admin.movePhase(${phaseIdx}, -1)">⬆️ تحريك لأعلى</button>
+          <button class="btn-small btn-secondary" type="button" onclick="admin.movePhase(${phaseIdx}, 1)">⬇️ تحريك لأسفل</button>
+          <button class="btn-small btn-danger" type="button" onclick="admin.removePhase(${phaseIdx})">🗑️ حذف المرحلة</button>
+        </div>
+      `;
+      
+      div.appendChild(headerDiv);
+      div.appendChild(bodyDiv);
+      list.appendChild(div);
+      
+      // معالجة أحداث التعديل
+      bodyDiv.querySelectorAll('input[data-phase], textarea[data-phase]').forEach(el => {
+        el.addEventListener('change', () => {
+          const pIdx = parseInt(el.getAttribute('data-phase'), 10);
+          const key = el.getAttribute('data-key');
+          const missionKey = el.getAttribute('data-mission');
+          
+          if (key) {
+            phases[pIdx][key] = el.value;
+          } else if (missionKey) {
+            phases[pIdx].mission[missionKey] = el.value;
+          }
+        });
+      });
+      
+      // رندر الأسئلة
+      this.renderQuestions(phaseIdx);
+    });
+  },
+
+  renderQuestions(phaseIdx) {
+    const phase = phases[phaseIdx];
+    const container = document.getElementById(`questions-${phaseIdx}`);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    phase.questions.forEach((q, qIdx) => {
       const div = document.createElement('div');
       div.className = 'stage-editor';
-      div.innerHTML = `
-        <div class="stage-header">
-          <span>${escapeHTML(idx+1)}. ${escapeHTML(s.title)}</span>
-          <span style="font-size:10px; opacity:0.6">${escapeHTML(s.type)}</span>
+      
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'stage-header';
+      headerDiv.innerHTML = `
+        <span>${escapeHTML(qIdx + 1)}. ${escapeHTML(q.title)}</span>
+        <span style="font-size:10px; opacity:0.6">${escapeHTML(q.type)}</span>
+      `;
+      headerDiv.addEventListener('click', () => this.toggleQuestionAccordion(phaseIdx, qIdx));
+      
+      const bodyDiv = document.createElement('div');
+      bodyDiv.className = 'stage-body';
+      bodyDiv.innerHTML = `
+        <label>عنوان السؤال</label>
+        <input type="text" value="${escapeHTML(q.title)}" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="title">
+        
+        <div style="display:flex; gap:10px">
+          <div style="flex:1">
+            <label>نوع السؤال</label>
+            <select data-phase="${phaseIdx}" data-question="${qIdx}" data-key="type">
+              <option value="text" ${q.type==='text'?'selected':''}>نص</option>
+              <option value="pin4" ${q.type==='pin4'?'selected':''}>أرقام (4)</option>
+              <option value="pin3" ${q.type==='pin3'?'selected':''}>أرقام (3)</option>
+              <option value="choice" ${q.type==='choice'?'selected':''}>خيارات</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <label>الإجابة الصحيحة</label>
+            <input type="text" value="${escapeHTML(q.answer)}" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="answer">
+          </div>
         </div>
-        <div class="stage-body">
-          <label>عنوان السؤال</label>
-          <input type="text" value="${escapeHTML(s.title)}" data-idx="${idx}" data-key="title">
-
-          <div style="display:flex; gap:10px">
-            <div style="flex:1">
-              <label>النوع</label>
-              <select data-idx="${idx}" data-key="type">
-                <option value="text" ${s.type==='text'?'selected':''}>نص</option>
-                <option value="pin4" ${s.type==='pin4'?'selected':''}>أرقام (4)</option>
-                <option value="pin3" ${s.type==='pin3'?'selected':''}>أرقام (3)</option>
-                <option value="choice" ${s.type==='choice'?'selected':''}>خيارات</option>
-              </select>
-            </div>
-            <div style="flex:1">
-              <label>الإجابة</label>
-              <input type="text" value="${escapeHTML(s.answer)}" data-idx="${idx}" data-key="answer">
-            </div>
-          </div>
-
-          <label>نص اللغز</label>
-          <textarea rows="2" data-idx="${idx}" data-key="prompt">${escapeHTML(s.prompt)}</textarea>
-
-          <div class="choice-only" style="${s.type==='choice'?'':'display:none'}">
-            <label>الخيارات (بينهم فاصلة)</label>
-            <input type="text" value="${escapeHTML(s.options || '')}" data-idx="${idx}" data-key="options">
-          </div>
-
-          <label>التلميح</label>
-          <input type="text" value="${escapeHTML(s.hint || '')}" data-idx="${idx}" data-key="hint">
-
-          <label>رسالة النجاح</label>
-          <input type="text" value="${escapeHTML(s.successMsg || '')}" data-idx="${idx}" data-key="successMsg">
-
-          <label>المهمة</label>
-          <input type="text" value="${escapeHTML(s.task || '')}" data-idx="${idx}" data-key="task">
-
-          <label>رابط صورة (اختياري)</label>
-          <input type="text" value="${escapeHTML(s.img || '')}" data-idx="${idx}" data-key="img" placeholder="https://...">
-
-          <div style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; display:flex; gap:10px;">
-            <button class="btn-small btn-secondary" type="button" onclick="admin.move(${idx}, -1)">⬆️</button>
-            <button class="btn-small btn-secondary" type="button" onclick="admin.move(${idx}, 1)">⬇️</button>
-            <button class="btn-small btn-danger" type="button" onclick="admin.remove(${idx})" style="margin-right:auto">حذف</button>
-          </div>
+        
+        <label>نص السؤال</label>
+        <textarea rows="2" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="prompt">${escapeHTML(q.prompt)}</textarea>
+        
+        <div class="choice-only" style="${q.type==='choice'?'':'display:none'}">
+          <label>الخيارات (بينهم فاصلة)</label>
+          <input type="text" value="${escapeHTML(q.options || '')}" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="options">
+        </div>
+        
+        <label>التلميح</label>
+        <input type="text" value="${escapeHTML(q.hint || '')}" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="hint">
+        
+        <label>رسالة النجاح</label>
+        <input type="text" value="${escapeHTML(q.successMsg || '')}" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="successMsg">
+        
+        <label>المهمة المطلوبة</label>
+        <input type="text" value="${escapeHTML(q.task || '')}" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="task">
+        
+        <label>رابط الصورة (اختياري)</label>
+        <input type="text" value="${escapeHTML(q.img || '')}" data-phase="${phaseIdx}" data-question="${qIdx}" data-key="img" placeholder="https://...">
+        
+        <div style="margin-top:15px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); display:flex; gap:10px;">
+          <button class="btn-small btn-secondary" type="button" onclick="admin.moveQuestion(${phaseIdx}, ${qIdx}, -1)">⬆️</button>
+          <button class="btn-small btn-secondary" type="button" onclick="admin.moveQuestion(${phaseIdx}, ${qIdx}, 1)">⬇️</button>
+          <button class="btn-small btn-danger" type="button" onclick="admin.removeQuestion(${phaseIdx}, ${qIdx})" style="margin-right:auto">🗑️ حذف</button>
         </div>
       `;
-      list.appendChild(div);
-
-      div.querySelector('.stage-header').addEventListener('click', () => this.toggleAccordion(idx));
-    });
-
-    list.querySelectorAll('input[data-idx], textarea[data-idx], select[data-idx]').forEach(el => {
-      el.addEventListener('change', () => {
-        const idx = parseInt(el.getAttribute('data-idx'), 10);
-        const key = el.getAttribute('data-key');
-        const val = el.value;
-
-        stages[idx][key] = val;
-
-        if (key === 'type') {
-          const parent = el.closest('.stage-body');
-          const box = parent.querySelector('.choice-only');
-          if (box) box.style.display = (val === 'choice') ? 'block' : 'none';
-          if (val === 'choice' && !stages[idx].options) stages[idx].options = "1,2,3,4";
-        }
+      
+      div.appendChild(headerDiv);
+      div.appendChild(bodyDiv);
+      container.appendChild(div);
+      
+      // معالجة أحداث التعديل
+      bodyDiv.querySelectorAll('input[data-question], textarea[data-question], select[data-question]').forEach(el => {
+        el.addEventListener('change', () => {
+          const pIdx = parseInt(el.getAttribute('data-phase'), 10);
+          const qIdx = parseInt(el.getAttribute('data-question'), 10);
+          const key = el.getAttribute('data-key');
+          
+          phases[pIdx].questions[qIdx][key] = el.value;
+          
+          if (key === 'type') {
+            const parent = el.closest('.stage-body');
+            const box = parent.querySelector('.choice-only');
+            if (box) box.style.display = (el.value === 'choice') ? 'block' : 'none';
+            if (el.value === 'choice' && !phases[pIdx].questions[qIdx].options) {
+              phases[pIdx].questions[qIdx].options = "خيار1,خيار2,خيار3,خيار4";
+            }
+          }
+        });
       });
     });
   },
 
-  addStage() {
-    stages.push({ title: "سؤال جديد", type: "text", prompt: "السؤال...", answer: "الجواب", hint: "", task: "", successMsg: "", img: "" });
+  addPhase() {
+    phases.push({
+      id: phases.length + 1,
+      name: "مرحلة جديدة",
+      icon: "⭐",
+      mission: {
+        icon: "🎯",
+        description: "وصف المهمة...",
+        task: "نص المهمة...",
+        secretCode: "كود سري"
+      },
+      questions: []
+    });
     this.renderList();
-    this.toggleAccordion(stages.length - 1);
+    this.togglePhaseAccordion(phases.length - 1);
   },
 
-  remove(idx) {
+  removePhase(idx) {
+    if (!confirm("متأكد من حذف هذه المرحلة وجميع أسئلتها؟")) return;
+    phases.splice(idx, 1);
+    this.renderList();
+  },
+
+  movePhase(idx, dir) {
+    if (idx + dir < 0 || idx + dir >= phases.length) return;
+    [phases[idx], phases[idx + dir]] = [phases[idx + dir], phases[idx]];
+    this.renderList();
+  },
+
+  addQuestion(phaseIdx) {
+    phases[phaseIdx].questions.push({
+      title: "سؤال جديد",
+      type: "text",
+      prompt: "نص السؤال...",
+      answer: "الإجابة",
+      options: "",
+      hint: "",
+      task: "",
+      successMsg: "",
+      img: ""
+    });
+    this.renderQuestions(phaseIdx);
+    const phaseEditor = document.querySelectorAll('.phase-editor')[phaseIdx];
+    if (phaseEditor) {
+      phaseEditor.classList.add('open');
+      const lastQuestion = phaseEditor.querySelectorAll('.stage-editor')[phases[phaseIdx].questions.length - 1];
+      if (lastQuestion) lastQuestion.classList.add('open');
+    }
+  },
+
+  removeQuestion(phaseIdx, qIdx) {
     if (!confirm("حذف هذا السؤال؟")) return;
-    stages.splice(idx, 1);
-    this.renderList();
+    phases[phaseIdx].questions.splice(qIdx, 1);
+    this.renderQuestions(phaseIdx);
   },
 
-  move(idx, dir) {
-    if (idx + dir < 0 || idx + dir >= stages.length) return;
-    [stages[idx], stages[idx + dir]] = [stages[idx + dir], stages[idx]];
-    this.renderList();
-  },
-
-  editMotivations() {
-    const list = document.getElementById('motivationsList');
-    list.innerHTML = '<h3 style="margin-bottom:15px;">✏️ تعديل الرسائل التحفيزية</h3>';
-    list.style.display = 'block';
-    document.getElementById('stagesList').style.display = 'none';
-
-    motivations.forEach((mot, idx) => {
-      const div = document.createElement('div');
-      div.className = 'stage-editor open';
-      div.innerHTML = `
-        <div class="stage-body">
-          <label>بعد عدد الإجابات</label>
-          <input type="number" value="${escapeHTML(mot.after)}" data-idx="${idx}" data-key="after">
-          <label>الرسالة</label>
-          <textarea rows="2" data-idx="${idx}" data-key="message">${escapeHTML(mot.message)}</textarea>
-          <button class="btn-small btn-danger" type="button" onclick="admin.removeMotivation(${idx})">حذف</button>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-
-    list.querySelectorAll('input[data-idx], textarea[data-idx]').forEach(el => {
-      el.addEventListener('change', () => {
-        const idx = parseInt(el.getAttribute('data-idx'), 10);
-        const key = el.getAttribute('data-key');
-        if (key === 'after') motivations[idx].after = parseInt(el.value, 10) || 0;
-        else motivations[idx].message = el.value;
-      });
-    });
-
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn-small btn';
-    addBtn.type = 'button';
-    addBtn.innerText = '+ إضافة رسالة';
-    addBtn.onclick = () => { motivations.push({ after: 3, message: "رسالة جديدة" }); this.editMotivations(); };
-
-    const backBtn = document.createElement('button');
-    backBtn.className = 'btn-small btn-secondary';
-    backBtn.type = 'button';
-    backBtn.innerText = 'رجوع للأسئلة';
-    backBtn.onclick = () => this.renderList();
-    backBtn.style.marginRight = '10px';
-
-    list.appendChild(addBtn);
-    list.appendChild(backBtn);
-  },
-
-  removeMotivation(idx) {
-    if (!confirm("حذف هذه الرسالة؟")) return;
-    motivations.splice(idx, 1);
-    this.editMotivations();
+  moveQuestion(phaseIdx, qIdx, dir) {
+    const questions = phases[phaseIdx].questions;
+    if (qIdx + dir < 0 || qIdx + dir >= questions.length) return;
+    [questions[qIdx], questions[qIdx + dir]] = [questions[qIdx + dir], questions[qIdx]];
+    this.renderQuestions(phaseIdx);
   },
 
   save() {
     try {
-      localStorage.setItem(STORAGE.data, JSON.stringify(stages));
-      localStorage.setItem(STORAGE.motivations, JSON.stringify(motivations));
+      localStorage.setItem(STORAGE.data, JSON.stringify(phases));
       ui.toast("تم الحفظ بنجاح! 💾", "success");
-      setTimeout(() => location.reload(), 600);
+      game.updatePhasesList();
+      setTimeout(() => {
+        this.close();
+      }, 1000);
     } catch (e) {
       console.error(e);
-      ui.toast("فشل الحفظ (Storage)", "error");
+      ui.toast("فشل الحفظ", "error");
     }
   },
 
   exportData() {
-    const data = JSON.stringify({ stages, motivations }, null, 2);
+    const data = JSON.stringify(phases, null, 2);
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(data).then(() => ui.toast("تم النسخ 📋", "success"))
+      navigator.clipboard.writeText(data)
+        .then(() => ui.toast("تم النسخ 📋", "success"))
         .catch(() => ui.toast("انسخ يدويًا من النافذة", "success"));
     } else {
       prompt("انسخ هذا النص:", data);
@@ -1178,19 +1612,20 @@ const admin = {
     if (!data) return;
     try {
       const parsed = JSON.parse(data);
-      if (parsed.stages && Array.isArray(parsed.stages)) stages = parsed.stages;
-      else if (Array.isArray(parsed)) stages = parsed;
-      motivations = (parsed.motivations && Array.isArray(parsed.motivations)) ? parsed.motivations : DEFAULT_MOTIVATIONS;
-
-      this.renderList();
-      ui.toast("تم اللصق، اضغط حفظ", "success");
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        phases = parsed;
+        this.renderList();
+        ui.toast("تم اللصق، اضغط حفظ", "success");
+      } else {
+        throw new Error("Invalid format");
+      }
     } catch (e) {
       ui.toast("الكود غير صالح", "error");
     }
   },
 
   resetFactory() {
-    if (!confirm("رجوع للإعدادات الأصلية؟")) return;
+    if (!confirm("رجوع للإعدادات الأصلية؟ سيتم حذف جميع التعديلات!")) return;
     STORAGE.allKeys().forEach(k => localStorage.removeItem(k));
     location.reload();
   },
@@ -1205,30 +1640,32 @@ const admin = {
     const panel = document.getElementById('adminPanel');
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
+    this.renderList();
   }
 };
 
-async function requestAdminAccess() {
-  const pin = prompt("الرمز السري:");
-  if (pin === null) return;
-
-  try {
-    ui.setLoading(true);
-    const hashed = await sha256Hex(ADMIN_SALT + pin);
-    ui.setLoading(false);
-
-    if (hashed && hashed === ADMIN_PIN_HASH) {
-      admin.open();
-      admin.renderList();
-    } else {
-      ui.toast("خطأ 🚫", "error");
-    }
-  } catch (e) {
-    ui.setLoading(false);
-    ui.toast("تعذر التحقق من الرمز", "error");
+function requestAdminAccess() {
+  const password = prompt("أدخل كلمة المرور للوحة التحكم:");
+  
+  if (password === null) return;
+  
+  // طباعة للتحقق
+  console.log("✅ كلمة المرور المدخلة:", password);
+  console.log("✅ كلمة المرور المطلوبة:", ADMIN_PASSWORD);
+  
+  if (password === ADMIN_PASSWORD) {
+    admin.open();
+    ui.toast("مرحباً في لوحة التحكم! 🎉", "success");
+    console.log("✅ تم فتح لوحة التحكم بنجاح!");
+  } else {
+    ui.toast("❌ كلمة المرور خاطئة! الصحيحة: " + ADMIN_PASSWORD, "error");
+    console.log("❌ كلمة المرور خاطئة!");
   }
 }
 
+/* ===========================
+   بدء التطبيق
+=========================== */
 document.addEventListener('DOMContentLoaded', () => {
   game.init();
 });
