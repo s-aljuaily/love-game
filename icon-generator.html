@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مولد الأيقونات - رحلة حبنا</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a0029, #390050);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    .icon-container {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 40px 0;
+    }
+    .icon-box {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    canvas {
+      display: block;
+      margin: 10px auto;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+    button {
+      background: linear-gradient(45deg, #d63384, #a61e63);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+      transition: 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    .instructions {
+      background: rgba(0,230,118,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 30px auto;
+      max-width: 800px;
+      border: 2px solid rgba(0,230,118,0.3);
+      text-align: right;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>💕 مولد أيقونات اللعبة</h1>
+  <p>اضغط على الأزرار لتحميل الأيقونات</p>
+
+  <div class="icon-container">
+    <div class="icon-box">
+      <h3>192x192</h3>
+      <canvas id="icon192" width="192" height="192"></canvas>
+      <button onclick="downloadIcon('icon192', 'icon-192.png')">تحميل 📥</button>
+    </div>
+
+    <div class="icon-box">
+      <h3>512x512</h3>
+      <canvas id="icon512" width="512" height="512"></canvas>
+      <button onclick="downloadIcon('icon512', 'icon-512.png')">تحميل 📥</button>
+    </div>
+
+    <div class="icon-box">
+      <h3>180x180 (Apple)</h3>
+      <canvas id="iconApple" width="180" height="180"></canvas>
+      <button onclick="downloadIcon('iconApple', 'icon-apple-touch.png')">تحميل 📥</button>
+    </div>
+  </div>
+
+  <button onclick="downloadAll()" style="font-size: 18px; padding: 15px 40px;">
+    📦 تحميل جميع الأيقونات
+  </button>
+
+  <div class="instructions">
+    <h3>📝 التعليمات:</h3>
+    <ol style="text-align: right;">
+      <li>اضغط على "📦 تحميل جميع الأيقونات" أو حمّل كل أيقونة على حدة</li>
+      <li>ارفع الأيقونات على GitHub في نفس مجلد الملف الرئيسي</li>
+      <li>ارفع ملف <code>manifest.webmanifest</code> أيضاً</li>
+      <li>أضف السطر التالي في <code>&lt;head&gt;</code> من ملف HTML:</li>
+    </ol>
+    <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left; direction: ltr;">
+&lt;link rel="manifest" href="/manifest.webmanifest"&gt;
+&lt;link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"&gt;
+&lt;link rel="apple-touch-icon" href="/icon-apple-touch.png"&gt;</pre>
+  </div>
+
+  <script>
+    function drawIcon(canvas) {
+      const ctx = canvas.getContext('2d');
+      const size = canvas.width;
+      
+      // خلفية متدرجة
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#d63384');
+      gradient.addColorStop(1, '#a61e63');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // رسم قلب + خاتم
+      ctx.save();
+      ctx.translate(size/2, size/2);
+      
+      // القلب
+      const heartScale = size / 200;
+      ctx.scale(heartScale, heartScale);
+      ctx.beginPath();
+      ctx.moveTo(0, 20);
+      ctx.bezierCurveTo(-50, -30, -100, -10, -50, 40);
+      ctx.lineTo(0, 70);
+      ctx.lineTo(50, 40);
+      ctx.bezierCurveTo(100, -10, 50, -30, 0, 20);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      
+      // الخاتم
+      ctx.beginPath();
+      ctx.arc(30, -40, 25, 0, Math.PI * 2);
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      
+      // الماسة
+      ctx.beginPath();
+      ctx.moveTo(30, -70);
+      ctx.lineTo(40, -60);
+      ctx.lineTo(30, -50);
+      ctx.lineTo(20, -60);
+      ctx.closePath();
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      
+      ctx.restore();
+    }
+    
+    function downloadIcon(canvasId, filename) {
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    function downloadAll() {
+      setTimeout(() => downloadIcon('icon192', 'icon-192.png'), 100);
+      setTimeout(() => downloadIcon('icon512', 'icon-512.png'), 300);
+      setTimeout(() => downloadIcon('iconApple', 'icon-apple-touch.png'), 500);
+      alert('✅ جاري تحميل جميع الأيقونات...');
+    }
+    
+    // رسم الأيقونات عند تحميل الصفحة
+    window.onload = function() {
+      drawIcon(document.getElementById('icon192'));
+      drawIcon(document.getElementById('icon512'));
+      drawIcon(document.getElementById('iconApple'));
+    };
+  </script>
+</body>
+</html>
