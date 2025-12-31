@@ -1,37 +1,76 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.3">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-  </style>
-</head>
-<body>
-<p class="p1">{</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"name": "رحلة حبنا - لعبة رومانسية",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"short_name": "رحلة حبنا",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"start_url": "./",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"scope": "./",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"display": "standalone",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"background_color": "#1a0029",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"theme_color": "#2c003e",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"description": "لعبة تفاعلية رومانسية لاختبار الذكريات والتواريخ المميزة",</p>
-<p class="p1"><span class="Apple-converted-space">  </span>"icons": [</p>
-<p class="p1"><span class="Apple-converted-space">    </span>{</p>
-<p class="p1"><span class="Apple-converted-space">      </span>"src": "icon-192.png",</p>
-<p class="p1"><span class="Apple-converted-space">      </span>"sizes": "192x192",</p>
-<p class="p1"><span class="Apple-converted-space">      </span>"type": "image/png"</p>
-<p class="p1"><span class="Apple-converted-space">    </span>},</p>
-<p class="p1"><span class="Apple-converted-space">    </span>{</p>
-<p class="p1"><span class="Apple-converted-space">      </span>"src": "icon-512.png",</p>
-<p class="p1"><span class="Apple-converted-space">      </span>"sizes": "512x512",</p>
-<p class="p1"><span class="Apple-converted-space">      </span>"type": "image/png"</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>]</p>
-<p class="p1">}</p>
-</body>
-</html>
+{
+  "name": "رحلة حبنا - لعبة رومانسية تفاعلية",
+  "short_name": "رحلة حبنا",
+  "description": "لعبة رومانسية تفاعلية عبر 4 مراحل من الحب والذكريات",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a0029",
+  "theme_color": "#d63384",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["games", "entertainment", "lifestyle"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-apple-touch.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-1.png",
+      "sizes": "1170x2532",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "شاشة البداية"
+    },
+    {
+      "src": "screenshot-2.png",
+      "sizes": "1170x2532",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "شاشة اللعب"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "بدء لعبة جديدة",
+      "short_name": "لعبة جديدة",
+      "description": "ابدأ رحلة حب جديدة",
+      "url": "/?action=new-game",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "المتابعة",
+      "short_name": "متابعة",
+      "description": "تابع من حيث توقفت",
+      "url": "/?action=continue",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
