@@ -333,6 +333,11 @@
     }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    @keyframes fadeOut { from {opacity:1;} to {opacity:0;} }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
     @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
 
     @media (max-width: 600px) {
@@ -544,7 +549,6 @@
 
       <div id="adminPhasesList"></div>
 
-      <button class="btn" type="button" style="margin-top:20px;" onclick="admin.save()">💾 حفظ جميع التغييرات</button>
       <br><br><br>
     </div>
   </div>
@@ -802,6 +806,43 @@ const ui = {
       document.body.appendChild(el);
       setTimeout(() => el.remove(), 3200);
     }
+  },
+  celebrationScreen(message = "مبروك! 🎉") {
+    // إنشاء شاشة الاحتفال
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(214, 51, 132, 0.95), rgba(166, 30, 99, 0.95));
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      text-align: center;
+      color: white;
+      animation: bounce 0.6s ease;
+    `;
+    content.innerHTML = `
+      <div style="font-size: 120px; margin-bottom: 20px; animation: pulse 1s infinite;">🎉</div>
+      <h1 style="font-size: 48px; margin: 0; font-weight: 900; text-shadow: 0 4px 20px rgba(0,0,0,0.3);">${message}</h1>
+    `;
+    
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    
+    // كونفيتي
+    this.confetti();
+    
+    // إزالة بعد 2 ثانية
+    setTimeout(() => {
+      overlay.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => overlay.remove(), 300);
+    }, 2000);
   }
 };
 
@@ -1213,6 +1254,7 @@ const game = {
   },
 
   handleSuccess(question) {
+    // اشعار بسيط للأسئلة
     ui.toast(question.successMsg || "✅ إجابة صحيحة!", "success");
     ui.confetti();
     stats.save();
@@ -1266,8 +1308,8 @@ const game = {
     const cleanCorrect = this.normalize(phase.mission.secretCode);
 
     if (cleanUser === cleanCorrect) {
-      ui.toast("✅ الكود صحيح! مبروك!", "success");
-      ui.confetti();
+      // شاشة احتفال كاملة
+      ui.celebrationScreen("مبروك! أكملتي المرحلة! 🎉👑");
       
       gameStats.phasesCompleted++;
       stats.save();
@@ -1285,7 +1327,7 @@ const game = {
           this.render();
           this.updateBackButton();
         }
-      }, 1000);
+      }, 2500);
     } else {
       gameStats.wrongAnswers++;
       stats.save();
@@ -1428,6 +1470,9 @@ const admin = {
           } else if (missionKey) {
             phases[pIdx].mission[missionKey] = el.value;
           }
+          
+          // حفظ تلقائي
+          admin.save();
         });
       });
       
@@ -1525,6 +1570,9 @@ const admin = {
               phases[pIdx].questions[qIdx].options = "خيار1,خيار2,خيار3,خيار4";
             }
           }
+          
+          // حفظ تلقائي
+          admin.save();
         });
       });
     });
@@ -1545,18 +1593,21 @@ const admin = {
     });
     this.renderList();
     this.togglePhaseAccordion(phases.length - 1);
+    this.save(); // حفظ تلقائي
   },
 
   removePhase(idx) {
     if (!confirm("متأكد من حذف هذه المرحلة وجميع أسئلتها؟")) return;
     phases.splice(idx, 1);
     this.renderList();
+    this.save(); // حفظ تلقائي
   },
 
   movePhase(idx, dir) {
     if (idx + dir < 0 || idx + dir >= phases.length) return;
     [phases[idx], phases[idx + dir]] = [phases[idx + dir], phases[idx]];
     this.renderList();
+    this.save(); // حفظ تلقائي
   },
 
   addQuestion(phaseIdx) {
@@ -1578,12 +1629,14 @@ const admin = {
       const lastQuestion = phaseEditor.querySelectorAll('.stage-editor')[phases[phaseIdx].questions.length - 1];
       if (lastQuestion) lastQuestion.classList.add('open');
     }
+    this.save(); // حفظ تلقائي
   },
 
   removeQuestion(phaseIdx, qIdx) {
     if (!confirm("حذف هذا السؤال؟")) return;
     phases[phaseIdx].questions.splice(qIdx, 1);
     this.renderQuestions(phaseIdx);
+    this.save(); // حفظ تلقائي
   },
 
   moveQuestion(phaseIdx, qIdx, dir) {
@@ -1591,19 +1644,16 @@ const admin = {
     if (qIdx + dir < 0 || qIdx + dir >= questions.length) return;
     [questions[qIdx], questions[qIdx + dir]] = [questions[qIdx + dir], questions[qIdx]];
     this.renderQuestions(phaseIdx);
+    this.save(); // حفظ تلقائي
   },
 
   save() {
     try {
       localStorage.setItem(STORAGE.data, JSON.stringify(phases));
-      ui.toast("تم الحفظ بنجاح! 💾", "success");
       game.updatePhasesList();
-      setTimeout(() => {
-        this.close();
-      }, 1000);
+      console.log('✅ Auto-saved successfully');
     } catch (e) {
-      console.error(e);
-      ui.toast("فشل الحفظ", "error");
+      console.error('❌ Auto-save failed:', e);
     }
   },
 
