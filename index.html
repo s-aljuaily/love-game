@@ -5,6 +5,800 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>مولّد إعلان مسابقة رمضانية (A4)</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b0d10;
+      --card:#121722;
+      --muted:#aab4c5;
+      --text:#eef2ff;
+      --line:#243045;
+      --accent:#f6c454;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Cairo", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:linear-gradient(180deg,#07090c, #0b0d10 50%, #07090c);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:22px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .card{
+      background:rgba(18,23,34,.85);
+      border:1px solid rgba(36,48,69,.7);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+    h1{
+      margin:0 0 8px 0;
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:10px 0 6px;
+    }
+    input, select, textarea{
+      width:100%;
+      background:#0f1420;
+      border:1px solid var(--line);
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+      font-family:"Cairo", sans-serif;
+      font-size:14px;
+    }
+    textarea{min-height:78px; resize:vertical;}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.5;
+    }
+    .btns{
+      display:flex;
+      gap:10px;
+      margin-top:14px;
+      flex-wrap:wrap;
+    }
+    button{
+      border:1px solid rgba(36,48,69,.9);
+      background:#0f1420;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-family:"Cairo", sans-serif;
+      font-weight:700;
+      transition:.15s;
+    }
+    button:hover{ transform: translateY(-1px); border-color: rgba(246,196,84,.9);}
+    button.primary{
+      background: linear-gradient(135deg, rgba(246,196,84,.18), rgba(246,196,84,.06));
+      border-color: rgba(246,196,84,.55);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border:1px solid rgba(36,48,69,.8);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:10px;
+    }
+
+    .previewHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .previewHead .meta{
+      color:var(--muted);
+      font-size:12px;
+    }
+    .canvasWrap{
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid rgba(36,48,69,.8);
+      background:#0b0f16;
+      padding:10px;
+    }
+    canvas{
+      max-width:100%;
+      height:auto;
+      border-radius:10px;
+    }
+
+    .small{
+      font-size:12px; color:var(--muted); margin-top:10px; line-height:1.7;
+    }
+    .hr{height:1px; background:rgba(36,48,69,.8); margin:14px 0;}
+    .condList{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:8px;
+    }
+    .condItem{
+      display:grid;
+      grid-template-columns: 1fr 44px;
+      gap:8px;
+      align-items:center;
+    }
+    .danger{
+      border-color: rgba(255, 87, 87, .6) !important;
+      color: rgba(255, 190, 190, 1);
+    }
+    .track4Row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .track4Row select{ flex:1; }
+    .track4Row button{ flex-shrink:0; padding:10px; }
+    .addTrack4Btn{
+      margin-top:8px;
+      border-color: rgba(246,196,84,.4);
+      color: rgba(246,196,84,.9);
+    }
+    .titleCenter{
+      text-align:center;
+      margin-bottom:6px;
+    }
+    @media (max-width: 600px){
+      .row{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+
+    <h1 class="titleCenter" style="font-size:22px; text-align:center;">مولّد إعلان مسابقة رمضانية (A4)</h1>
+    <p class="sub" style="text-align:center; margin-top:-10px;">
+      تكتب البيانات وتطلع مباشرة على الصورة — التصدير: PNG + PDF للطباعة
+    </p>
+
+    <!-- ===== المعاينة (فوق) ===== -->
+    <div class="card">
+      <div class="previewHead">
+        <div>
+          <h1 style="margin:0;font-size:16px;">المعاينة</h1>
+          <div class="meta">A4 - Cairo - RTL</div>
+        </div>
+        <div class="meta" id="status">جاهز</div>
+      </div>
+      <div class="canvasWrap">
+        <canvas id="canvas" width="2480" height="3508"></canvas>
+      </div>
+      <div class="btns">
+        <button class="primary" id="renderBtn" type="button">تحديث المعاينة</button>
+        <button id="downloadPng" type="button">تحميل PNG</button>
+        <button id="downloadPdf" type="button">تحميل PDF (A4)</button>
+      </div>
+    </div>
+
+    <!-- ===== بيانات الإعلان (تحت) ===== -->
+    <div class="card">
+      <h1>بيانات الإعلان</h1>
+      <p class="sub">
+        لو تركت خانة فاضية بنعبيها تلقائيًا بنص افتراضي.
+      </p>
+
+      <label>اسم المسابقة (حد 60 حرف)</label>
+      <input id="contestName" maxlength="60" placeholder="مثال: مسابقة السويلم لحفظ القرآن الكريم — اتركها فاضية للعنوان الافتراضي" />
+      <div class="hint">اكتب اسم المسابقة كامل هنا — مثلاً: مسابقة آل فلان لحفظ القرآن الكريم</div>
+
+      <div class="hr"></div>
+
+      <div class="pill">القالب الحالي: صورة A4 المفرّغة</div>
+
+      <label>رابط صورة القالب (A4)</label>
+      <input id="bgUrl" value="https://i.imgur.com/vEturSp.jpeg" />
+
+      <label style="margin-top:10px;">أو ارفع صورة القالب من جهازك (أفضل حل للتحميل والطباعة)</label>
+      <input id="bgFile" type="file" accept="image/*" />
+      <div class="hint">
+        لو الرابط ما يشتغل أو التحميل ما يعمل بسبب حماية المتصفح، ارفع القالب من جهازك هنا.
+        (نضمن بعدها أن PNG/PDF يشتغل 100%).
+      </div>
+
+      <div class="hr"></div>
+
+      <label>وصف/مقدمة (اختياري)</label>
+      <textarea id="intro" placeholder="اتركها فاضية للنص الافتراضي"></textarea>
+
+      <div class="hr"></div>
+
+      <label>مسارات المسابقة (اختر 3 أو 4 مسارات)</label>
+      <div class="row">
+        <div>
+          <label>المسار الأول</label>
+          <select class="track" data-i="1"></select>
+          <input class="trackOther" data-i="1" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
+        </div>
+        <div>
+          <label>المسار الثاني</label>
+          <select class="track" data-i="2"></select>
+          <input class="trackOther" data-i="2" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>المسار الثالث</label>
+          <select class="track" data-i="3"></select>
+          <input class="trackOther" data-i="3" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
+        </div>
+        <div id="track4Container">
+          <label>المسار الرابع (اختياري)</label>
+          <div class="track4Row">
+            <select class="track" data-i="4"></select>
+            <button type="button" class="danger" id="removeTrack4" title="حذف المسار الرابع">حذف</button>
+          </div>
+          <input class="trackOther" data-i="4" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
+        </div>
+      </div>
+      <div id="addTrack4Wrap" style="display:none;">
+        <button type="button" class="addTrack4Btn" id="addTrack4">+ إضافة مسار رابع</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <label>آلية التسميع</label>
+      <div class="row">
+        <div>
+          <select id="tasmeeType">
+            <option value="default">بنات / أولاد (تحديد مشرف)</option>
+            <option value="other">أخرى (سطرين)</option>
+          </select>
+        </div>
+        <div></div>
+      </div>
+
+      <div id="tasmeeDefault">
+        <div class="row">
+          <div>
+            <label>تسميع البنات سيكون عند:</label>
+            <input id="girlsAt" placeholder="مثال: فاطمة" />
+          </div>
+          <div>
+            <label>تسميع الأولاد سيكون عند:</label>
+            <input id="boysAt" placeholder="مثال: الأستاذ داود" />
+          </div>
+        </div>
+      </div>
+
+      <div id="tasmeeOther" style="display:none;">
+        <label>اكتب آلية التسميع (سطرين كحد أقصى)</label>
+        <textarea id="tasmeeOtherText" placeholder="مثال: التسميع عبر واتساب (مقطع صوتي)&#10;ويتم التسليم يوميًا بعد التراويح"></textarea>
+      </div>
+
+      <div class="hr"></div>
+
+      <label>شروط المسابقة (2–4) + تقدر تزيد</label>
+      <div class="condList" id="conds"></div>
+      <div class="btns">
+        <button id="addCond" type="button">+ إضافة شرط</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div>
+          <label>آخر موعد للتسليم (نص)</label>
+          <input id="deadline" placeholder="مثال: 29 رمضان" />
+        </div>
+        <div>
+          <label>ملحوظة (سطر واحد - اختياري)</label>
+          <input id="note" placeholder="مثال: للاستفسار تواصلوا مع..." />
+        </div>
+      </div>
+
+      <label>الختام (اختياري)</label>
+      <input id="closing" placeholder="اتركها فاضية للختام الافتراضي" />
+
+      <p class="small">
+        حتى لو رابط الصورة ما سمح (CORS)، النظام يعطيك قالب بديل بسيط للطباعة + التحميل يشتغل.
+        لكن للحصول على نفس القالب 100%: ارفع الصورة من جهازك.
+      </p>
+    </div>
+  </div>
+
+<script>
+  // ====== Config ======
+  const A4_W = 2480;
+  const A4_H = 3508;
+
+  const TRACK_OPTIONS = [
+    "سورة الكهف","سورة الملك","سورة يس","سورة الرحمن","سورة الواقعة","سورة السجدة","سورة الإنسان",
+    "سورة النبأ","سورة النازعات","سورة عبس","سورة التكوير","سورة الانفطار","سورة المطففين",
+    "سورة البروج","سورة الطارق","سورة الأعلى","سورة الغاشية","سورة الفجر","سورة البلد","سورة الشمس",
+    "سورة الضحى","سورة الشرح","سورة القدر","سورة البينة","سورة الزلزلة","سورة العاديات","سورة القارعة",
+    "سورة التكاثر","سورة العصر","سورة الهمزة","سورة الفيل","سورة قريش","سورة الماعون","سورة الكوثر",
+    "سورة الكافرون","سورة النصر","سورة المسد","سورة الإخلاص","سورة الفلق","سورة الناس",
+    "جزء عم","جزء تبارك",
+    "أخرى (اكتبها بنفسك)"
+  ];
+
+  const DEFAULT_TRACKS = ["سورة الكهف", "جزء تبارك", "جزء عم", "سورة الناس"];
+
+  const DEFAULT_INTRO = () =>
+`فرصة رائعة لحفظ كتاب الله والفوز بجوائز قيمة!\nيسرّكم المشاركة في هذه المسابقة التي تهدف لتشجيع الجميع على حفظ كلام الله وتدبره.\nهذه المسابقة ليست فقط لاختبار القدرات، بل هي أيضًا طريق لنيل الأجر والبركة.`;
+
+  const DEFAULT_CONDS = [
+    "الالتزام بالتلاوة الصحيحة.",
+    "التحلّي بالأخلاق القرآنية وروح التنافس الطيب."
+  ];
+
+  const DEFAULT_CLOSING = "سجّل الآن، واختر مسارك، وابدأ رحلتك مع القرآن!";
+
+  // ====== DOM ======
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const bgUrl = document.getElementById("bgUrl");
+  const bgFile = document.getElementById("bgFile");
+
+  let bgDataUrl = "";
+
+  const contestName = document.getElementById("contestName");
+  const intro = document.getElementById("intro");
+
+  const tasmeeType = document.getElementById("tasmeeType");
+  const tasmeeDefault = document.getElementById("tasmeeDefault");
+  const tasmeeOther = document.getElementById("tasmeeOther");
+  const girlsAt = document.getElementById("girlsAt");
+  const boysAt = document.getElementById("boysAt");
+  const tasmeeOtherText = document.getElementById("tasmeeOtherText");
+
+  const condsEl = document.getElementById("conds");
+  const addCondBtn = document.getElementById("addCond");
+
+  const deadline = document.getElementById("deadline");
+  const note = document.getElementById("note");
+  const closing = document.getElementById("closing");
+
+  const statusEl = document.getElementById("status");
+
+  const renderBtn = document.getElementById("renderBtn");
+  const downloadPng = document.getElementById("downloadPng");
+  const downloadPdf = document.getElementById("downloadPdf");
+
+  // Track 4 elements
+  const track4Container = document.getElementById("track4Container");
+  const addTrack4Wrap = document.getElementById("addTrack4Wrap");
+  const addTrack4Btn = document.getElementById("addTrack4");
+  const removeTrack4Btn = document.getElementById("removeTrack4");
+
+  let track4Visible = true; // starts visible
+
+  // ====== Helpers ======
+  function setStatus(msg){ statusEl.textContent = msg; }
+
+  function loadImage(url){
+    return new Promise((resolve,reject)=>{
+      const img = new Image();
+      if(/^https?:\/\//i.test(url)) img.crossOrigin = "anonymous";
+      img.onload = ()=> resolve(img);
+      img.onerror = ()=> reject(new Error("فشل تحميل الصورة: " + url));
+      img.src = url.trim();
+    });
+  }
+
+  function clampText(str, max){
+    if(!str) return "";
+    str = String(str).trim();
+    return str.length > max ? str.slice(0, max-1) + "…" : str;
+  }
+
+  function isEmpty(v){ return !v || !String(v).trim(); }
+
+  function wrapText(ctx, text, maxWidth){
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    for(const w of words){
+      const test = line ? (line + " " + w) : w;
+      if(ctx.measureText(test).width <= maxWidth){
+        line = test;
+      }else{
+        if(line) lines.push(line);
+        line = w;
+      }
+    }
+    if(line) lines.push(line);
+    return lines;
+  }
+
+  function drawWrapped(ctx, text, x, y, maxWidth, lineHeight, align="center"){
+    ctx.textAlign = align;
+    const lines = text.split("\n").flatMap(p => wrapText(ctx, p, maxWidth));
+    lines.forEach((ln, i)=> ctx.fillText(ln, x, y + i*lineHeight));
+    return lines.length * lineHeight;
+  }
+
+  function createCondInput(value=""){
+    const wrap = document.createElement("div");
+    wrap.className = "condItem";
+
+    const input = document.createElement("input");
+    input.value = value;
+    input.placeholder = "اكتب الشرط هنا...";
+    input.addEventListener("input", ()=> render());
+
+    const del = document.createElement("button");
+    del.type="button";
+    del.textContent="حذف";
+    del.className="danger";
+    del.addEventListener("click", ()=>{ wrap.remove(); render(); });
+
+    wrap.appendChild(input);
+    wrap.appendChild(del);
+    return wrap;
+  }
+
+  function drawFallbackBackground(){
+    const g = ctx.createLinearGradient(0,0,0,A4_H);
+    g.addColorStop(0, "#f7f1e6");
+    g.addColorStop(1, "#efe2cd");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,A4_W,A4_H);
+
+    ctx.strokeStyle = "#3b2a1a";
+    ctx.lineWidth = 18;
+    ctx.strokeRect(120,120,A4_W-240,A4_H-240);
+    ctx.lineWidth = 6;
+    ctx.strokeRect(160,160,A4_W-320,A4_H-320);
+
+    ctx.fillStyle = "rgba(59,42,26,.12)";
+    ctx.beginPath();
+    ctx.roundRect(320, 260, A4_W-640, 2400, 120);
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(246,196,84,.35)";
+    ctx.beginPath();
+    ctx.arc(A4_W-420, 520, 120, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(59,42,26,.18)";
+    ctx.fillRect(0, A4_H-520, A4_W, 520);
+  }
+
+  // ====== Track 4 toggle ======
+  function hideTrack4(){
+    track4Visible = false;
+    track4Container.style.display = "none";
+    addTrack4Wrap.style.display = "block";
+    render();
+  }
+
+  function showTrack4(){
+    track4Visible = true;
+    track4Container.style.display = "block";
+    addTrack4Wrap.style.display = "none";
+    render();
+  }
+
+  // ====== Tracks UI ======
+  function initTracks(){
+    document.querySelectorAll("select.track").forEach(sel=>{
+      sel.innerHTML = TRACK_OPTIONS.map(opt => `<option value="${opt}">${opt}</option>`).join("");
+      const i = Number(sel.dataset.i);
+      const def = DEFAULT_TRACKS[i-1];
+      if(def && TRACK_OPTIONS.includes(def)) sel.value = def;
+
+      sel.addEventListener("change", ()=>{
+        const i = sel.dataset.i;
+        const other = document.querySelector(`input.trackOther[data-i="${i}"]`);
+        if(sel.value.startsWith("أخرى")){
+          other.style.display = "block";
+        }else{
+          other.style.display = "none";
+          other.value = "";
+        }
+        render();
+      });
+
+      sel.addEventListener("input", render);
+    });
+
+    document.querySelectorAll("input.trackOther").forEach(inp=> inp.addEventListener("input", render));
+  }
+
+  function getTracks(){
+    const out = [];
+    const maxTrack = track4Visible ? 4 : 3;
+    for(let i=1;i<=maxTrack;i++){
+      const sel = document.querySelector(`select.track[data-i="${i}"]`);
+      const other = document.querySelector(`input.trackOther[data-i="${i}"]`);
+      let val = sel?.value || "";
+      if(val.startsWith("أخرى")) val = other?.value?.trim() || "مسار (اكتب المحتوى)";
+      out.push(val);
+    }
+    return out;
+  }
+
+  // ====== Defaults generator ======
+  function buildData(){
+    const contest = clampText(contestName.value, 60);
+    const contestFinal = contest || "مسابقة حفظ القرآن الكريم";
+
+    const introFinal = isEmpty(intro.value) ? DEFAULT_INTRO() : intro.value.trim();
+
+    const tracks = getTracks();
+
+    const tasmeeFinal = (()=>{
+      if(tasmeeType.value === "default"){
+        const g = girlsAt.value.trim() || "فاطمة";
+        const b = boysAt.value.trim() || "الأستاذ داود";
+        return {
+          type:"default",
+          lines:[
+            `تسميع البنات سيكون عند: ${g}.`,
+            `تسميع الأولاد سيكون عند: ${b}.`
+          ]
+        };
+      }
+      const t = tasmeeOtherText.value.trim();
+      const safe = t || "آلية التسميع: تُحدّد من قِبل الجهة المنظمة.";
+      return { type:"other", lines: safe.split("\n").slice(0,2) };
+    })();
+
+    const conds = Array.from(condsEl.querySelectorAll("input")).map(i=> i.value.trim()).filter(Boolean);
+    const condsFinal = conds.length ? conds : DEFAULT_CONDS.slice();
+
+    return {
+      bg: (bgDataUrl || bgUrl.value.trim()),
+      contest: contestFinal,
+      intro: introFinal,
+      tracks,
+      tasmee: tasmeeFinal,
+      conds: condsFinal,
+      deadline: deadline.value.trim() || "29 رمضان",
+      note: note.value.trim(),
+      closing: closing.value.trim() || DEFAULT_CLOSING
+    };
+  }
+
+  const TRACK_LABELS = ["المسار الأول", "المسار الثاني", "المسار الثالث", "المسار الرابع"];
+
+  // ====== Draw layout on canvas ======
+  async function render(){
+    setStatus("يتم التحديث...");
+    const data = buildData();
+
+    ctx.clearRect(0,0,A4_W,A4_H);
+
+    let img = null;
+    let usedFallback = false;
+    const bgToUse = data.bg;
+
+    if(bgToUse){
+      try{
+        img = await loadImage(bgToUse);
+      }catch(err){
+        console.warn(err);
+        img = null;
+      }
+    }
+
+    if(img){
+      ctx.drawImage(img, 0, 0, A4_W, A4_H);
+    }else{
+      usedFallback = true;
+      drawFallbackBackground();
+    }
+
+    const titleColor = "#3b2a1a";
+    const bodyColor  = "#3b2a1a";
+    const accentColor = "#8a5a2a";
+
+    const centerX = A4_W/2;
+    let y = 520;
+
+    // Contest name (first thing on the poster)
+    ctx.fillStyle = titleColor;
+    ctx.font = "900 102px Cairo";
+    ctx.textAlign = "center";
+    const contestLines = wrapText(ctx, data.contest, 1750);
+    contestLines.slice(0,2).forEach((ln, i)=> ctx.fillText(ln, centerX, y + i*110));
+    y += Math.min(2, contestLines.length)*110;
+
+    // Intro
+    y += 70;
+    ctx.font = "700 46px Cairo";
+    ctx.fillStyle = bodyColor;
+    const introHeight = drawWrapped(ctx, data.intro, centerX, y, 1750, 70, "center");
+    y += introHeight + 70;
+
+    // Tracks title
+    ctx.fillStyle = accentColor;
+    ctx.font = "900 70px Cairo";
+    ctx.fillText("مسارات المسابقة", centerX, y);
+    y += 78;
+
+    ctx.fillStyle = bodyColor;
+    ctx.font = "700 42px Cairo";
+    ctx.fillText("(يختار كل مشارك مسارًا واحدًا فقط)", centerX, y);
+    y += 85;
+
+    ctx.font = "800 50px Cairo";
+    const trackLabels = TRACK_LABELS.slice(0, data.tracks.length);
+    trackLabels.forEach((label, i)=>{
+      const t = `${label}: ${data.tracks[i]}.`;
+      const h = drawWrapped(ctx, t, centerX, y, 1750, 76, "center");
+      y += h + 12;
+    });
+
+    // Tasmee
+    y += 35;
+    ctx.fillStyle = accentColor;
+    ctx.font = "900 66px Cairo";
+    ctx.fillText("آلية التسميع:", centerX, y);
+    y += 90;
+
+    ctx.fillStyle = bodyColor;
+    ctx.font = "800 50px Cairo";
+    data.tasmee.lines.slice(0,2).forEach((ln)=>{
+      const h = drawWrapped(ctx, ln, centerX, y, 1750, 78, "center");
+      y += h + 10;
+    });
+
+    // Conditions
+    y += 35;
+    ctx.fillStyle = accentColor;
+    ctx.font = "900 66px Cairo";
+    ctx.fillText("شروط المسابقة:", centerX, y);
+    y += 90;
+
+    ctx.fillStyle = bodyColor;
+    ctx.font = "800 48px Cairo";
+    data.conds.slice(0,6).forEach((c)=>{
+      const h = drawWrapped(ctx, c, centerX, y, 1750, 74, "center");
+      y += h + 8;
+    });
+
+    // Deadline
+    y += 35;
+    ctx.fillStyle = bodyColor;
+    ctx.font = "900 58px Cairo";
+    ctx.fillText(`آخر موعد للتسليم: ${data.deadline}`, centerX, y);
+    y += 95;
+
+    // Note
+    if(data.note){
+      ctx.fillStyle = bodyColor;
+      ctx.font = "800 46px Cairo";
+      const h = drawWrapped(ctx, data.note, centerX, y, 1750, 70, "center");
+      y += h + 55;
+    }
+
+    // Closing
+    ctx.fillStyle = accentColor;
+    ctx.font = "900 58px Cairo";
+    drawWrapped(ctx, data.closing, centerX, y, 1750, 76, "center");
+
+    setStatus(usedFallback ? "تم (قالب بديل للطباعة)" : "تم");
+  }
+
+  // ====== Downloads ======
+  function downloadCanvasPNG(){
+    try{
+      const dataURL = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.download = "ramadan-competition-a4.png";
+      a.href = dataURL;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }catch(e){
+      alert("تعذر التحميل. جرّب رفع صورة القالب من جهازك (خانة رفع الصورة) ثم أعد التحميل.");
+      console.error(e);
+    }
+  }
+
+  function downloadCanvasPDF(){
+    try{
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4", compress: true });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      pdf.addImage(imgData, "JPEG", 0, 0, pageW, pageH);
+      pdf.save("ramadan-competition-a4.pdf");
+    }catch(e){
+      alert("تعذر تصدير PDF. جرّب رفع صورة القالب من جهازك ثم أعد التصدير.");
+      console.error(e);
+    }
+  }
+
+  // ====== Events ======
+  function wire(){
+    condsEl.innerHTML = "";
+    DEFAULT_CONDS.forEach(c=> condsEl.appendChild(createCondInput(c)));
+
+    addCondBtn.addEventListener("click", ()=>{
+      condsEl.appendChild(createCondInput(""));
+      render();
+    });
+
+    bgFile.addEventListener("change", ()=>{
+      const file = bgFile.files && bgFile.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { bgDataUrl = String(reader.result || ""); render(); };
+      reader.readAsDataURL(file);
+    });
+
+    document.querySelectorAll("input,textarea,select").forEach(el=> el.addEventListener("input", ()=> render()));
+
+    tasmeeType.addEventListener("change", ()=>{
+      if(tasmeeType.value === "default"){
+        tasmeeDefault.style.display = "block";
+        tasmeeOther.style.display = "none";
+      }else{
+        tasmeeDefault.style.display = "none";
+        tasmeeOther.style.display = "block";
+      }
+      render();
+    });
+
+    // Track 4 toggle
+    removeTrack4Btn.addEventListener("click", hideTrack4);
+    addTrack4Btn.addEventListener("click", showTrack4);
+
+    renderBtn.addEventListener("click", render);
+    downloadPng.addEventListener("click", downloadCanvasPNG);
+    downloadPdf.addEventListener("click", downloadCanvasPDF);
+  }
+
+  // Boot
+  initTracks();
+  wire();
+  render();
+</script>
+
+</body>
+</html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>مولّد إعلان مسابقة رمضانية (A4)</title>
+
   <!-- Tajawal Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
