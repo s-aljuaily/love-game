@@ -1,774 +1,577 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#d63384">
-  <title>شفرة حب 💍❤️</title>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>مولّد إعلان مسابقة رمضانية (A4)</title>
+
+  <!-- Tajawal Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
   <style>
-    :root {
-      --primary: #d63384;
-      --primary-dark: #a61e63;
-      --bg1: #1a0029;
-      --bg2: #390050;
-      --success: #00e676;
-      --error: #ff5252;
-      --warning: #ffc107;
-      --mission: #ff6b35;
+    :root{
+      --bg:#0b0d10;
+      --card:#121722;
+      --muted:#aab4c5;
+      --text:#eef2ff;
+      --line:#243045;
+      --accent:#f6c454;
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-      margin: 0; font-family: 'Tajawal', sans-serif;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: #fff; min-height: 100vh;
-      display: flex; justify-content: center; align-items: center;
-      padding: 15px;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Tajawal", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:linear-gradient(180deg,#07090c, #0b0d10 50%, #07090c);
+      color:var(--text);
     }
-    .container { width: 100%; max-width: 520px; }
-    .card {
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 20px; padding: 24px;
-      box-shadow: 0 15px 50px rgba(0,0,0,0.5);
-      animation: float 6s ease-in-out infinite;
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:22px;
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:18px;
     }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-    
-    .btn {
-      background: linear-gradient(45deg, var(--primary), var(--primary-dark));
-      border: none; color: #fff; padding: 16px; border-radius: 16px;
-      font-size: 16px; font-weight: 800; font-family: inherit;
-      cursor: pointer; width: 100%; margin-top: 15px;
-      box-shadow: 0 5px 20px rgba(214,51,132,0.4);
+    @media (max-width: 980px){
+      .wrap{grid-template-columns:1fr; }
     }
-    .btn:active { transform: scale(0.97); }
-    .btn-secondary { background: rgba(255,255,255,0.1); box-shadow: none; }
-    .btn-mission { background: linear-gradient(45deg, var(--mission), #e55d2d); }
-
-    input {
-      width: 100%; padding: 15px; background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
-      color: #fff; font-family: inherit; font-size: 16px;
-      text-align: center; outline: none;
+    .card{
+      background:rgba(18,23,34,.85);
+      border:1px solid rgba(36,48,69,.7);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0,0,0,.35);
     }
-    input:focus { border-color: var(--primary); }
-
-    .screen { display: none; }
-    .screen.active { display: block; animation: fadeUp 0.5s ease; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
-
-    .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #ff80ab); transition: width 0.5s; }
-
-    .phase-indicator {
-      background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px;
-      margin-bottom: 20px; border-right: 4px solid var(--primary); text-align: center;
+    h1{
+      margin:0 0 8px 0;
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
     }
-    .phase-title { font-size: 18px; font-weight: 800; color: var(--primary); }
-    .phase-subtitle { font-size: 13px; opacity: 0.7; margin-top: 5px; }
-
-    .pin-grid { display: flex; gap: 10px; justify-content: center; margin: 20px 0; direction: ltr; }
-    .pin-input { width: 55px; height: 65px; font-size: 26px; border-radius: 16px; }
-
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
-    .option-card {
-      background: rgba(255,255,255,0.05); padding: 18px; border-radius: 16px;
-      text-align: center; cursor: pointer; border: 2px solid transparent;
-      font-weight: 600; transition: 0.2s;
+    .sub{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
     }
-    .option-card.selected { border-color: var(--primary); background: rgba(214,51,132,0.15); }
-
-    #errorToast {
-      position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
-      background: rgba(255,82,82,0.95); color: #fff;
-      padding: 12px 30px; border-radius: 50px;
-      font-weight: 700; display: none; z-index: 1000;
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:10px 0 6px;
     }
-
-    #successBubble {
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(25, 25, 45, 0.98);
-      border: 3px solid var(--success);
-      padding: 25px 40px; border-radius: 20px;
-      text-align: center; display: none; z-index: 1000;
-      box-shadow: 0 10px 50px rgba(0,230,118,0.4);
-      max-width: 90%;
+    input, select, textarea{
+      width:100%;
+      background:#0f1420;
+      border:1px solid var(--line);
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+      font-family:"Tajawal", sans-serif;
+      font-size:14px;
     }
-    #successBubble .icon { font-size: 50px; display: block; margin-bottom: 10px; }
-    #successBubble .msg { font-size: 17px; font-weight: 700; color: var(--success); line-height: 1.6; }
-    @keyframes popIn { from{transform:translate(-50%,-50%) scale(0.5);opacity:0} to{transform:translate(-50%,-50%) scale(1);opacity:1} }
-
-    .back-btn {
-      position: fixed; top: 20px; right: 20px;
-      width: 45px; height: 45px; background: rgba(0,0,0,0.5);
-      border-radius: 50%; border: none; color: #fff; font-size: 20px;
-      cursor: pointer; display: none; align-items: center; justify-content: center;
-      z-index: 100;
+    textarea{min-height:78px; resize:vertical;}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.5;
     }
-    .back-btn.visible { display: flex; }
-    .back-btn:hover { background: var(--primary); }
-
-    .mission-box {
-      background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(229,93,45,0.15));
-      border: 3px solid var(--mission); border-radius: 20px;
-      padding: 25px; margin: 20px 0; text-align: center;
+    .btns{
+      display:flex;
+      gap:10px;
+      margin-top:14px;
+      flex-wrap:wrap;
     }
-    .mission-icon { font-size: 70px; margin-bottom: 10px; }
-    .mission-title { font-size: 22px; font-weight: 900; color: var(--mission); }
-    .mission-desc { font-size: 16px; line-height: 1.9; margin-top: 15px; white-space: pre-line; }
-
-    .secret-code-box {
-      background: rgba(0,0,0,0.4); border: 2px dashed var(--warning);
-      border-radius: 15px; padding: 20px; margin: 20px 0;
+    button{
+      border:1px solid rgba(36,48,69,.9);
+      background:#0f1420;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-family:"Tajawal", sans-serif;
+      font-weight:800;
+      transition:.15s;
     }
-
-    .overlay-stars {
-      position: fixed; inset: 0; z-index: 10000;
-      background: linear-gradient(180deg, #0a0015 0%, #1a0029 50%, #390050 100%);
-      display: none; align-items: center; justify-content: center;
-      flex-direction: column; text-align: center;
-      overflow: hidden;
+    button:hover{ transform: translateY(-1px); border-color: rgba(246,196,84,.9);}
+    button.primary{
+      background: linear-gradient(135deg, rgba(246,196,84,.18), rgba(246,196,84,.06));
+      border-color: rgba(246,196,84,.55);
     }
-    .overlay-stars .stars { position: absolute; inset: 0; }
-    .overlay-stars .star {
-      position: absolute; width: 4px; height: 4px; background: #fff;
-      border-radius: 50%; animation: twinkle 1s ease infinite;
+    button.danger{
+      border-color: rgba(255, 87, 87, .65);
+      color: rgba(255, 210, 210, 1);
     }
-    .overlay-stars .content { position: relative; z-index: 1; animation: zoomIn 0.6s ease; }
-    .overlay-stars .o-icon { font-size: 100px; filter: drop-shadow(0 0 30px rgba(255,107,53,0.8)); }
-    .overlay-stars .o-title { font-size: 28px; font-weight: 900; margin-top: 15px; 
-      background: linear-gradient(90deg, #ff6b35, #ffc107, #ff6b35);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-size: 200%; animation: shimmer 2s linear infinite;
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border:1px solid rgba(36,48,69,.8);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:10px;
     }
-    .overlay-stars .o-subtitle { font-size: 18px; opacity: 0.9; margin-top: 10px; color: #fff; }
-    @keyframes twinkle { 0%,100%{opacity:0.3} 50%{opacity:1} }
-    @keyframes zoomIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
-    @keyframes shimmer { to{background-position:200%} }
-
-    .overlay-curtain {
-      position: fixed; inset: 0; z-index: 10000;
-      display: none; align-items: center; justify-content: center;
-      flex-direction: column; text-align: center;
-      overflow: hidden;
+    .previewHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
     }
-    .overlay-curtain .curtain-left, .overlay-curtain .curtain-right {
-      position: absolute; top: 0; width: 50%; height: 100%;
-      background: linear-gradient(180deg, #d63384, #a61e63);
+    .previewHead .meta{
+      color:var(--muted);
+      font-size:12px;
     }
-    .overlay-curtain .curtain-left { left: 0; }
-    .overlay-curtain .curtain-right { right: 0; }
-    .overlay-curtain .content { position: relative; z-index: 1; opacity: 0; }
-    .overlay-curtain .o-icon { font-size: 100px; }
-    .overlay-curtain .o-title { font-size: 28px; font-weight: 900; margin-top: 15px; }
-    .overlay-curtain .o-subtitle { font-size: 18px; opacity: 0.9; margin-top: 10px; }
-    @keyframes curtainLeft { from{transform:translateX(-100%)} to{transform:translateX(0)} }
-    @keyframes curtainRight { from{transform:translateX(100%)} to{transform:translateX(0)} }
-    @keyframes fadeInContent { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
-
-    .win-screen { text-align: center; }
-    .win-icon { font-size: 80px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
-    
-    .final-message {
-      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px; padding: 25px; margin: 25px 0;
-      line-height: 2; font-size: 16px;
+    .canvasWrap{
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid rgba(36,48,69,.8);
+      background:#0b0f16;
+      padding:10px;
     }
-
-    .final-code-container {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      border: 4px solid var(--success);
-      border-radius: 25px; padding: 30px; margin: 25px 0;
-      position: relative; overflow: hidden;
+    canvas{
+      max-width:100%;
+      height:auto;
+      border-radius:10px;
     }
-    .final-code-container::before {
-      content: ''; position: absolute; inset: -50%;
-      background: conic-gradient(from 0deg, transparent, var(--success), transparent, var(--primary), transparent);
-      animation: rotate 4s linear infinite;
+    .small{
+      font-size:12px; color:var(--muted); margin-top:10px; line-height:1.7;
     }
-    .final-code-container::after {
-      content: ''; position: absolute; inset: 4px;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      border-radius: 21px;
-    }
-    @keyframes rotate { to { transform: rotate(360deg); } }
-    
-    .final-code-inner { position: relative; z-index: 1; }
-    .final-code-label { font-size: 14px; opacity: 0.8; margin-bottom: 15px; }
-    .final-code-digits { display: flex; justify-content: center; gap: 15px; }
-    .digit-box {
-      width: 70px; height: 90px; background: linear-gradient(180deg, #00e676, #00c853);
-      border-radius: 15px; display: flex; align-items: center; justify-content: center;
-      font-size: 48px; font-weight: 900; color: #000;
-      box-shadow: 0 10px 30px rgba(0,230,118,0.5);
-      animation: digitPop 0.5s ease backwards;
-    }
-    .digit-box:nth-child(1) { animation-delay: 0.3s; }
-    .digit-box:nth-child(2) { animation-delay: 0.6s; }
-    .digit-box:nth-child(3) { animation-delay: 0.9s; }
-    @keyframes digitPop { from{transform:scale(0) rotateY(180deg);opacity:0} to{transform:scale(1) rotateY(0);opacity:1} }
-
-    .confetti { position: fixed; width: 10px; height: 10px; z-index: 10001; animation: fall linear forwards; }
-    @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
-
-    @media (max-width: 500px) {
-      .pin-input { width: 50px; height: 58px; font-size: 22px; }
-      .digit-box { width: 60px; height: 80px; font-size: 40px; }
-      .final-message { font-size: 15px; padding: 20px; }
-      .overlay-stars .o-icon, .overlay-curtain .o-icon { font-size: 80px; }
-      .overlay-stars .o-title, .overlay-curtain .o-title { font-size: 24px; }
-    }
+    .hr{height:1px; background:rgba(36,48,69,.8); margin:14px 0;}
   </style>
 </head>
 <body>
 
-<div id="errorToast">❌ خطأ!</div>
-<div id="successBubble">
-  <span class="icon">✨</span>
-  <span class="msg" id="successMsg"></span>
-</div>
-
-<div class="overlay-stars" id="overlayStars">
-  <div class="stars" id="starsContainer"></div>
-  <div class="content">
-    <div class="o-icon" id="starsIcon">👑</div>
-    <div class="o-title" id="starsTitle">مبروك!</div>
-    <div class="o-subtitle" id="starsSubtitle">أكملتِ المرحلة بنجاح</div>
-  </div>
-</div>
-
-<div class="overlay-curtain" id="overlayCurtain">
-  <div class="curtain-left" id="curtainLeft"></div>
-  <div class="curtain-right" id="curtainRight"></div>
-  <div class="content" id="curtainContent">
-    <div class="o-icon" id="curtainIcon">🏆</div>
-    <div class="o-title" id="curtainTitle">مبروك!</div>
-    <div class="o-subtitle" id="curtainSubtitle">أكملتِ المرحلة بنجاح</div>
-  </div>
-</div>
-
-<button class="back-btn" id="backBtn" onclick="game.goBack()">⬅️</button>
-
-<div class="container">
-
-  <div id="screen-start" class="screen active">
-    <div class="card" style="text-align:center; padding: 40px 24px;">
-      <div style="font-size:70px; animation: pulse 2s infinite;">💍❤️</div>
-      <h1 style="margin:15px 0 10px; font-size:32px;">شفرة حب</h1>
-      <p style="opacity:0.85; line-height:1.8;">
-        أربع مراحل من الحب والعشق<br>
-        هااااه أنتِ مستعدة ياحياتي!؟
+  <div class="wrap">
+    <!-- Controls -->
+    <div class="card">
+      <h1>مولّد إعلان مسابقة رمضانية (A4)</h1>
+      <p class="sub">
+        ✅ أول شيء في التصميم هو اسم المسابقة. <br>
+        ✅ تم حذف اسم العائلة بالكامل. <br>
+        ✅ المسار الرابع اختياري (تقدر تحذفه).
       </p>
-      <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin:20px 0; text-align:right;">
-        <div style="font-weight:700; margin-bottom:10px; text-align:center;">🎯 المراحل:</div>
-        <div style="font-size:14px; line-height:2.2;">
-          🔥 1. ايام بينيناها ووسنبنيها<br>
-          🗺️ 2. البحث والتحري<br>
-          ❤️ 3. حبي وحياتي وقلبي<br>
-          🎯 4. لنصل مع بعض
+
+      <div class="pill">🖼️ القالب: صورة A4 المفرّغة</div>
+
+      <label>رابط صورة القالب (A4)</label>
+      <input id="bgUrl" value="https://i.imgur.com/vEturSp.jpeg" />
+
+      <label style="margin-top:10px;">أو ارفع صورة القالب من جهازك (أفضل حل للطباعة)</label>
+      <input id="bgFile" type="file" accept="image/*" />
+      <div class="hint">
+        لو الرابط ما يشتغل بسبب حماية المتصفح، ارفع القالب من جهازك.
+      </div>
+
+      <!-- IMPORTANT: Contest first -->
+      <label>اسم المسابقة (حد 60)</label>
+      <input id="contestName" maxlength="60" placeholder="اتركها فاضية للعنوان الافتراضي" />
+
+      <label>وصف/مقدمة (اختياري)</label>
+      <textarea id="intro" placeholder="اتركها فاضية للنص الافتراضي"></textarea>
+
+      <div class="hr"></div>
+
+      <label>مسارات المسابقة (3 أو 4 مسارات)</label>
+      <div class="row">
+        <div>
+          <select class="track" data-i="1"></select>
+          <input class="trackOther" data-i="1" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
+        </div>
+        <div>
+          <select class="track" data-i="2"></select>
+          <input class="trackOther" data-i="2" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
         </div>
       </div>
-      <button class="btn" onclick="game.start()">شدي حيلك علشان تفتحين الي قدامك 😉</button>
-    </div>
-  </div>
 
-  <div id="screen-game" class="screen">
-    <div class="phase-indicator">
-      <div class="phase-title" id="phaseTitle">المرحلة 1</div>
-      <div class="phase-subtitle" id="phaseProgress">السؤال 1 من 5</div>
+      <div class="row">
+        <div>
+          <select class="track" data-i="3"></select>
+          <input class="trackOther" data-i="3" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
+        </div>
+
+        <!-- Track 4 wrapper -->
+        <div id="track4Wrap">
+          <select class="track" data-i="4"></select>
+          <input class="trackOther" data-i="4" placeholder="لو اخترت (أخرى) اكتب هنا" style="display:none;margin-top:8px;">
+        </div>
+      </div>
+
+      <div class="btns">
+        <button id="toggleTrack4" type="button" class="danger">حذف المسار الرابع</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- (Moved “top section” to end of poster rendering: deadline/note/closing at bottom) -->
+      <div class="row">
+        <div>
+          <label>آخر موعد للتسليم (نص)</label>
+          <input id="deadline" placeholder="مثال: 29 رمضان" />
+        </div>
+        <div>
+          <label>ملحوظة (سطر واحد - اختياري)</label>
+          <input id="note" placeholder="مثال: للاستفسار تواصلوا مع..." />
+        </div>
+      </div>
+
+      <label>الختام (اختياري)</label>
+      <input id="closing" placeholder="اتركها فاضية للختام الافتراضي" />
+
+      <div class="btns">
+        <button class="primary" id="renderBtn" type="button">تحديث المعاينة</button>
+        <button id="downloadPng" type="button">تحميل PNG</button>
+        <button id="downloadPdf" type="button">تحميل PDF (A4)</button>
+      </div>
+
+      <p class="small">
+        ملاحظة: لو فشل تحميل القالب من الرابط، سيتم رسم قالب بديل للطباعة تلقائيًا.
+      </p>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
-    
+
+    <!-- Preview -->
     <div class="card">
-      <h2 id="stageTitle" style="margin:0 0 10px; color:var(--primary); font-size:20px;"></h2>
-      <p id="stagePrompt" style="font-size:17px; line-height:1.7; white-space:pre-line; margin-bottom:20px;"></p>
-      
-      <div id="taskBox" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:20px; border-right:4px solid var(--primary); display:none;">
-        🫶 <b>ملاحظة:</b> <span id="stageTask"></span>
+      <div class="previewHead">
+        <div>
+          <h1 style="margin:0;font-size:16px;">المعاينة</h1>
+          <div class="meta">A4 • Tajawal • RTL</div>
+        </div>
+        <div class="meta" id="status">جاهز</div>
       </div>
-
-      <div id="inputContainer"></div>
-
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn btn-secondary" style="flex:1;" onclick="game.showHint()">💡 تلميح</button>
-        <button class="btn" style="flex:2; margin:0;" onclick="game.check()">تأكيد ✓</button>
-      </div>
-      
-      <div style="text-align:center; margin-top:15px;">
-        <span id="stageCounter" style="font-size:12px; opacity:0.6;"></span>
-        <span onclick="game.restart()" style="font-size:12px; opacity:0.6; margin-right:15px; cursor:pointer; text-decoration:underline;">إعادة من البداية</span>
+      <div class="canvasWrap">
+        <canvas id="canvas" width="2480" height="3508"></canvas>
       </div>
     </div>
   </div>
-
-  <div id="screen-mission" class="screen">
-    <div class="card">
-      <div class="mission-box">
-        <div class="mission-icon" id="missionIcon">🎯</div>
-        <div class="mission-title">مبروك! أكملتِ المرحلة 🎉</div>
-        <div class="mission-desc" id="missionDesc"></div>
-      </div>
-
-      <div style="background:rgba(255,193,7,0.1); padding:15px; border-radius:12px; margin-bottom:15px; border-right:4px solid var(--warning);">
-        💡 أكملي المهمة وأدخلي الكود السري للمتابعة
-      </div>
-
-      <div class="secret-code-box">
-        <div style="font-size:14px; opacity:0.8; margin-bottom:10px;">🔐 الكود السري:</div>
-        <input type="text" id="secretCodeInput" placeholder="أدخلي الكود هنا..." autocomplete="off">
-      </div>
-
-      <button class="btn btn-mission" onclick="game.verifyCode()">تأكيد الكود ✅</button>
-    </div>
-  </div>
-
-  <div id="screen-win" class="screen">
-    <div class="card win-screen">
-      <div class="win-icon">🎁👑</div>
-      <h1 style="color:var(--primary); margin:15px 0 5px; font-size:26px;">وصلتي للنهاية!</h1>
-      
-      <div class="final-message">
-        <div style="font-size:18px; margin-bottom:15px;">وهنا نصل…</div>
-        بعد كل مرحلة، وكل سؤال، وكل نبضة حب،<br>
-        لم يكن الكنز شيئًا نبحث عنه،<br>
-        بل كان لحظة نصل فيها معًا،<br>
-        <div style="margin-top:15px; font-weight:800; color:var(--primary);">فافتحي الشنطة…</div>
-        <div style="margin-top:10px; font-size:15px;">
-          فالكنز أنتِ الحقيقي والحب الأول والأخير،<br>
-          وما بعدها لنا 🤍
-        </div>
-      </div>
-
-      <div class="final-code-container">
-        <div class="final-code-inner">
-          <div class="final-code-label">🔐 الكود السري:</div>
-          <div class="final-code-digits" id="finalCodeDigits"></div>
-        </div>
-      </div>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0;">
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
-          <div style="font-size:28px; font-weight:900; color:var(--primary);" id="winAttempts">0</div>
-          <div style="font-size:13px; opacity:0.7;">المحاولات</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
-          <div style="font-size:28px; font-weight:900; color:var(--primary);">4</div>
-          <div style="font-size:13px; opacity:0.7;">المراحل</div>
-        </div>
-      </div>
-
-      <button class="btn btn-secondary" onclick="game.restart()">🔄 إعادة اللعبة</button>
-    </div>
-  </div>
-
-</div>
 
 <script>
-const STORAGE = 'love_code_final';
-const FINAL_CODE = '142';
+  // ====== Config ======
+  const A4_W = 2480; // ~A4 at 300dpi
+  const A4_H = 3508;
 
-const PHASES = [
-  {
-    name: "ايام بينيناها ووسنبنيها", icon: "🔥",
-    celebration: "stars",
-    mission: { icon: "📸", desc: "صوريلي صورة دلوعة وحلوة وامورة علشان تكملين المهمه 😉", code: "احب شفايفك" },
-    questions: [
-      { title: "تسخين 🔥", type: "text", prompt: "خلينا نسخن ، اكتبي كلمة \"احبك\"", answer: "احبك", hint: "بلا استهبال ، اكتبي \"احبك\" وبس", task: "يلا يلاااااا جاوبي", success: "كووييس كويييس ، تحسبين الموضوع سهل هييك؟؟!!!" },
-      { title: "تاريخ العقد 💍", type: "pin4", prompt: "متى كان تاريخ العقد؟", answer: "2410", hint: "اكتبي التاريخ متتالي مثلا: يوم15 شهر11 = 1511", task: "تاريخ محفور بقلبي", success: "اعظم تاريخ الى قلبي بكل تفاصيله ولن ينسى" },
-      { title: "أول تواصل 📱", type: "pin4", prompt: "متى كان اول تواصل بيننا؟", answer: "1310", hint: "ارجعي لاول صورة واول نص بالواتسب", task: "مصور الشاشة من برى من كثر التوتر", success: "فز قلبي ووقفت مكاني وقتها واذكرها بكل تفاصيلها" },
-      { title: "أول رسالة 💬", type: "text", prompt: "وش الجملة الي قلتها لك بعد رد السلام؟", answer: "ياهلا والله وسهلا ومرحبا", hint: "فيها ترحيب قوي (ياهلا...)", task: "سوي عليها منشن وسجليها فويس", success: "صح! كانت من كل قلبي والله 🤍" },
-      { title: "أول قبصة 🤗", type: "pin4", prompt: "ماهي تاريخ اول قبصة؟", answer: "2510", hint: "بعد العقد بيوم (ارجعي للدفتر)", task: "مسجله بدفترنا", success: "احلى ذكرى واحلى قبصة ياحلوك" }
-    ]
-  },
-  {
-    name: "البحث والتحري", icon: "🗺️",
-    celebration: "curtain",
-    mission: { icon: "💃", desc: "المهمه الي قبل الاخيرة\nابي اسورتي حلوتي امورتي ((💃🏻))\nقسما بالله عشقت عشقت عشقت", code: "اعشق كل قطعه فيك" },
-    questions: [
-      { title: "ميلاد حبيبك 🎂", type: "choice", prompt: "متى شرف على الدنيا حبيبك؟", answer: "1992", options: "1994,1992,1991,2025", hint: "حلووو بعد طالبة تلميح!", task: "الصدق اني انولدت بوقت اللقاء", success: "العمر كله لنا يابعد عمري" },
-      { title: "حروف الاسم ✏️", type: "text", prompt: "كم عدد حروف اسمي؟", answer: "5", hint: "عدي الاحرف بلا عجز", task: "كل حرف فيني يحبك", success: "خمسة وخميسة" },
-      { title: "الاسم المعشوق 💕", type: "text", prompt: "وشو الاسم الي اعشقه واحب اسمعه منك؟", answer: "سليماني", hint: "حقك وحلالك", task: "احب كل لقب تناديني فيه", success: "ايه والله انا حبيبك وسليمانك وحقك" },
-      { title: "دفتر الذكريات 📓", type: "text", prompt: "وين نسجل ذكرياتنا وعقاباتنا؟", answer: "دفتر", hint: "الي لونه ازرق وقلم", task: "يبيلنا جديد ابو 100 بسلك", success: "شلون اسرقه واحرقه لو سمحتي 😂" },
-      { title: "الألقاب الحلوة 🥰", type: "choice", prompt: "وشو احب الالقاب الى قلبي؟", answer: "كللللللهههننننن", options: "سليماني,سيمااان,بااابااا,كللللللهههننننن", hint: "وربي كلهن وزيادة", task: "هذولي جزء من حلاوتك", success: "وربي اني اعشقهن كلهن" },
-      { title: "أول قبلة 💋", type: "choice", prompt: "وين كانت اول شفة وقبلة حياة بيننا؟", answer: "بالبر", options: "بالسيارة,بالبر,بالبيت,عابرة وحنا واقفين", hint: "ااااخخخخ ياجلستنا", task: "كلما اذكرها اذوب", success: "طعمها للحين بفمي واعشقها مررررره" }
-    ]
-  },
-  {
-    name: "حبي وحياتي وقلبي", icon: "❤️",
-    celebration: "stars",
-    mission: { icon: "🍽️", desc: "مهمة خاصة 🍽️\nهذي المهمة الثانية ياحلوتي\nيلا خليني اذوق شيء من هالانامل الطعيمه\nيمي يمي يييممممي", code: "وربي احب هالاصابع" },
-    questions: [
-      { title: "المصعد 🛗", type: "text", prompt: "اول ماندخل مصعد على طول نتاكد من شيء فيه، وشو؟!", answer: "كاميره", hint: "هههههه والله لا اساعدك", task: "اشتاق لك بكل لحظة", success: "ايوا! ولو اقدر اوقف المصعد علشان ابوسك واحضنك" },
-      { title: "الرمز الخاص ♥️", type: "text", prompt: "وش الرمز (الإيموجي) اللي خصصته لك؟ (انسخيه والصقيه)", answer: "♥️", hint: "الغامق", task: "ولا يستاهله غيرك", success: "كل رموز الكيبورد خصصتها لك ياعمري" },
-      { title: "الاعتراف 😍", type: "choice", prompt: "هل اناااااا احبكككك اكثثثرررر من ايييي شييييي \"ومنك\"", answer: "ايييييييييييه", options: "ايييييييييييه,لا,نو,هممممممم", hint: "نييهاهاهاها", task: "نيهاااا هااايييي", success: "واعترفتي بيدك وتم التسجيل!" },
-      { title: "لوحة السيارة 🚗", type: "pin4", prompt: "كم رقم لوحة سيارتي؟", answer: "4205", hint: "تحفظين حقاتهم ولا حقتي؟!", task: "شدي حيلك يا قوقل اللوحات", success: "اشوا بعد احسب!" },
-      { title: "السفرة ✈️", type: "pin4", prompt: "متى تاريخ سفرتنا بمشيئة الله؟", answer: "2004", hint: "التاريخ مباشرة بدون فواصل", task: "اليوم الموعود", success: "ياجعلها سفرة لنا ولعمرنا ياحبيبتي" },
-      { title: "المحل الأول 🏪", type: "choice", prompt: "وشو اسم المحل الي انرسل باول صورة؟", answer: "الجديعي", options: "نمشي,الجفيلي,الجديعي,ريشتي", hint: "حاولي حاولي", task: "اخخخخخ بس", success: "ياحلونا ياحلونا ياحلونا" }
-    ]
-  },
-  {
-    name: "لنصل مع بعض", icon: "🎯",
-    celebration: "curtain",
-    mission: { icon: "🚘", desc: "المهمه الاخيرة\nتنسيق الطلعة 🚗\nرتبي لنا طلعه متكاملة بتنسيقك\nانا علي توجهيني واتفاجئ بالجدول", code: "احبك احبك" },
-    questions: [
-      { title: "المغسلة 🚿", type: "pin4", prompt: "المغسلة", answer: "1131", hint: "يمين يسار فوق تحت", task: "شدي حيلك شويتين", success: "وربي شطورة كفوو كفوو!" },
-      { title: "الزرعات 🌱", type: "pin4", prompt: "الزرعات", answer: "1235", hint: "شوفي وراهم", task: "الورد للورد ياحبيبت قلبي", success: "كفووو عليك والله موب هينه" },
-      { title: "الطاولات 🪑", type: "pin4", prompt: "الطاولات", answer: "3331", hint: "تحت الطاولة", task: "ركزي زين", success: "شطورة!" },
-      { title: "المطعم 🍽️", type: "pin4", prompt: "https://maps.app.goo.gl/YXSQ6eDiVCg4EfC66\nاخر اربع ارقام 📞", answer: "3881", hint: "رقم الجوال", task: "ييمي يمي يمممي", success: "يافرولتي واموورتي وكتكوتي" },
-      { title: "الرقم السري 🔐", type: "pin4", prompt: "الرقم السري لجوالي", answer: "1239", hint: "دقي علي اساليني 😅", task: "قايلك احفظيه!", success: "شطوراتي وربي" }
-    ]
-  }
-];
+  const TRACK_OPTIONS = [
+    "سورة الكهف","سورة الملك","سورة يس","سورة الرحمن","سورة الواقعة","سورة السجدة","سورة الإنسان",
+    "سورة النبأ","سورة النازعات","سورة عبس","سورة التكوير","سورة الانفطار","سورة المطففين",
+    "سورة البروج","سورة الطارق","سورة الأعلى","سورة الغاشية","سورة الفجر","سورة البلد","سورة الشمس",
+    "سورة الضحى","سورة الشرح","سورة القدر","سورة البينة","سورة الزلزلة","سورة العاديات","سورة القارعة",
+    "سورة التكاثر","سورة العصر","سورة الهمزة","سورة الفيل","سورة قريش","سورة الماعون","سورة الكوثر",
+    "سورة الكافرون","سورة النصر","سورة المسد","سورة الإخلاص","سورة الفلق","سورة الناس",
+    "جزء عم","جزء تبارك",
+    "أخرى (اكتبها بنفسك)"
+  ];
 
-let state = { phase: 0, question: 0, attempts: 0 };
+  const DEFAULT_TRACKS = ["سورة الكهف", "جزء تبارك", "جزء عم", "سورة الناس"]; // افتراضي
 
-function errorToast(msg) {
-  const t = document.getElementById('errorToast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2000);
-}
+  const DEFAULT_INTRO = () =>
+`✨ فرصة رائعة لحفظ كتاب الله والفوز بجوائز قيمة! ✨
+يسرّكم المشاركة في هذه المسابقة التي تهدف لتشجيع الجميع على حفظ كلام الله وتدبره.
+هذه المسابقة ليست فقط لاختبار القدرات، بل هي أيضًا طريق لنيل الأجر والبركة.`;
 
-function successBubble(msg) {
-  const bubble = document.getElementById('successBubble');
-  document.getElementById('successMsg').textContent = msg;
-  bubble.style.display = 'block';
-  bubble.style.animation = 'popIn 0.3s ease';
-  confetti(25);
-  setTimeout(() => bubble.style.display = 'none', 2000);
-}
+  const DEFAULT_CLOSING = "سجّل الآن، واختر مسارك، وابدأ رحلتك مع القرآن!";
 
-function confetti(count = 30) {
-  const colors = ['#d63384', '#fff', '#ff80ab', '#ffc107', '#00e676', '#ff6b35'];
-  for (let i = 0; i < count; i++) {
-    const el = document.createElement('div');
-    el.className = 'confetti';
-    el.style.left = Math.random() * 100 + 'vw';
-    el.style.top = -10 + 'px';
-    el.style.background = colors[Math.floor(Math.random() * colors.length)];
-    el.style.animationDuration = (Math.random() * 1.5 + 1) + 's';
-    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-    el.style.width = (Math.random() * 6 + 6) + 'px';
-    el.style.height = el.style.width;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 3000);
-  }
-}
+  // ====== DOM ======
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
 
-function showStarsCelebration(phaseName, phaseIcon) {
-  const overlay = document.getElementById('overlayStars');
-  const starsContainer = document.getElementById('starsContainer');
-  
-  document.getElementById('starsIcon').textContent = '👑';
-  document.getElementById('starsTitle').textContent = 'مبروك!';
-  document.getElementById('starsSubtitle').textContent = `أكملتِ ${phaseIcon} ${phaseName}`;
-  
-  starsContainer.innerHTML = '';
-  for (let i = 0; i < 60; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.animationDelay = Math.random() * 2 + 's';
-    star.style.width = (Math.random() * 3 + 2) + 'px';
-    star.style.height = star.style.width;
-    starsContainer.appendChild(star);
-  }
-  
-  overlay.style.display = 'flex';
-  confetti(80);
-  setTimeout(() => confetti(50), 600);
-  
-  return new Promise(resolve => {
-    setTimeout(() => {
-      overlay.style.display = 'none';
-      resolve();
-    }, 3000);
-  });
-}
+  const bgUrl = document.getElementById("bgUrl");
+  const bgFile = document.getElementById("bgFile");
+  let bgDataUrl = "";
 
-function showCurtainCelebration(phaseName, phaseIcon) {
-  const overlay = document.getElementById('overlayCurtain');
-  const curtainLeft = document.getElementById('curtainLeft');
-  const curtainRight = document.getElementById('curtainRight');
-  const content = document.getElementById('curtainContent');
-  
-  document.getElementById('curtainIcon').textContent = '🏆';
-  document.getElementById('curtainTitle').textContent = 'مبروك!';
-  document.getElementById('curtainSubtitle').textContent = `أكملتِ ${phaseIcon} ${phaseName}`;
-  
-  curtainLeft.style.animation = 'none';
-  curtainRight.style.animation = 'none';
-  content.style.animation = 'none';
-  
-  overlay.offsetHeight;
-  
-  curtainLeft.style.animation = 'curtainLeft 0.5s ease forwards';
-  curtainRight.style.animation = 'curtainRight 0.5s ease forwards';
-  content.style.animation = 'fadeInContent 0.5s ease 0.5s forwards';
-  
-  overlay.style.display = 'flex';
-  confetti(80);
-  setTimeout(() => confetti(50), 700);
-  
-  return new Promise(resolve => {
-    setTimeout(() => {
-      overlay.style.display = 'none';
-      resolve();
-    }, 3000);
-  });
-}
+  const contestName = document.getElementById("contestName");
+  const intro = document.getElementById("intro");
+  const deadline = document.getElementById("deadline");
+  const note = document.getElementById("note");
+  const closing = document.getElementById("closing");
 
-function normalize(t) {
-  return String(t || '').trim().toLowerCase().replace(/\s/g, '')
-    .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
-}
+  const statusEl = document.getElementById("status");
+  const renderBtn = document.getElementById("renderBtn");
+  const downloadPng = document.getElementById("downloadPng");
+  const downloadPdf = document.getElementById("downloadPdf");
 
-function save() {
-  localStorage.setItem(STORAGE, JSON.stringify(state));
-}
+  const track4Wrap = document.getElementById("track4Wrap");
+  const toggleTrack4 = document.getElementById("toggleTrack4");
+  let track4Enabled = true;
 
-function load() {
-  try {
-    const d = JSON.parse(localStorage.getItem(STORAGE));
-    if (d) state = { ...state, ...d };
-  } catch(e) {}
-}
+  // ====== Helpers ======
+  function setStatus(msg){ statusEl.textContent = msg; }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id)?.classList.add('active');
-  updateBackBtn();
-}
-
-function updateBackBtn() {
-  const btn = document.getElementById('backBtn');
-  const inGame = document.getElementById('screen-game').classList.contains('active');
-  btn.classList.toggle('visible', inGame && (state.phase > 0 || state.question > 0));
-}
-
-const game = {
-  init() {
-    load();
-    if (state.phase > 0 || state.question > 0) {
-      showScreen('screen-game');
-      this.render();
-    }
-  },
-
-  start() {
-    state = { phase: 0, question: 0, attempts: 0 };
-    save();
-    showScreen('screen-game');
-    this.render();
-  },
-
-  restart() {
-    if (confirm("متأكدة تبين تعيدين من البداية؟")) {
-      localStorage.removeItem(STORAGE);
-      state = { phase: 0, question: 0, attempts: 0 };
-      showScreen('screen-start');
-    }
-  },
-
-  goBack() {
-    if (state.question > 0) {
-      state.question--;
-    } else if (state.phase > 0) {
-      state.phase--;
-      state.question = PHASES[state.phase].questions.length - 1;
-    }
-    save();
-    this.render();
-  },
-
-  render() {
-    const phase = PHASES[state.phase];
-    const q = phase.questions[state.question];
-
-    document.getElementById('phaseTitle').textContent = `${phase.icon} ${phase.name}`;
-    document.getElementById('phaseProgress').textContent = `السؤال ${state.question + 1} من ${phase.questions.length}`;
-
-    let total = 0, done = 0;
-    PHASES.forEach((p, i) => {
-      total += p.questions.length;
-      if (i < state.phase) done += p.questions.length;
-      else if (i === state.phase) done += state.question;
+  function loadImage(url){
+    return new Promise((resolve,reject)=>{
+      const img = new Image();
+      if(/^https?:\/\//i.test(url)) img.crossOrigin = "anonymous";
+      img.onload = ()=> resolve(img);
+      img.onerror = ()=> reject(new Error("فشل تحميل الصورة: " + url));
+      img.src = url.trim();
     });
+  }
 
-    document.getElementById('progressBar').style.width = ((done + 1) / total * 100) + '%';
-    document.getElementById('stageCounter').textContent = `${done + 1} / ${total}`;
-    document.getElementById('stageTitle').textContent = q.title;
-    document.getElementById('stagePrompt').textContent = q.prompt;
+  function clampText(str, max){
+    if(!str) return "";
+    str = String(str).trim();
+    return str.length > max ? str.slice(0, max-1) + "…" : str;
+  }
 
-    const taskBox = document.getElementById('taskBox');
-    if (q.task) {
-      taskBox.style.display = 'block';
-      document.getElementById('stageTask').textContent = q.task;
-    } else {
-      taskBox.style.display = 'none';
-    }
+  function isEmpty(v){ return !v || !String(v).trim(); }
 
-    const container = document.getElementById('inputContainer');
-    container.innerHTML = '';
-
-    if (q.type === 'text') {
-      container.innerHTML = '<input type="text" id="ansInput" placeholder="اكتبي الإجابة..." autocomplete="off">';
-      setTimeout(() => {
-        const inp = document.getElementById('ansInput');
-        inp?.focus();
-        inp.onkeypress = e => { if (e.key === 'Enter') game.check(); };
-      }, 100);
-    } 
-    else if (q.type === 'choice') {
-      const opts = (q.options || '').split(',').filter(Boolean);
-      let html = '<div class="options-grid">';
-      opts.forEach(o => {
-        html += `<div class="option-card" onclick="game.select(this,'${o.trim()}')">${o.trim()}</div>`;
-      });
-      html += '</div><input type="hidden" id="ansInput">';
-      container.innerHTML = html;
-    }
-    else if (q.type.startsWith('pin')) {
-      const len = q.answer.length || 4;
-      let html = '<div class="pin-grid">';
-      for (let i = 0; i < len; i++) {
-        html += `<input type="tel" maxlength="1" class="pin-input" id="p${i}" inputmode="numeric">`;
+  function wrapText(ctx, text, maxWidth){
+    const words = String(text).split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    for(const w of words){
+      const test = line ? (line + " " + w) : w;
+      if(ctx.measureText(test).width <= maxWidth){
+        line = test;
+      }else{
+        if(line) lines.push(line);
+        line = w;
       }
-      html += '</div>';
-      container.innerHTML = html;
-      setTimeout(() => this.setupPin(len), 100);
     }
+    if(line) lines.push(line);
+    return lines;
+  }
 
-    updateBackBtn();
-  },
+  function drawWrapped(ctx, text, x, y, maxWidth, lineHeight, align="center"){
+    ctx.textAlign = align;
+    const blocks = String(text).split("\n");
+    const lines = blocks.flatMap(p => wrapText(ctx, p, maxWidth));
+    lines.forEach((ln, i)=> ctx.fillText(ln, x, y + i*lineHeight));
+    return lines.length * lineHeight;
+  }
 
-  setupPin(len) {
-    const inputs = document.querySelectorAll('.pin-input');
-    inputs[0]?.focus();
-    inputs.forEach((inp, i) => {
-      inp.oninput = e => {
-        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 1);
-        if (e.target.value && i < len - 1) document.getElementById(`p${i + 1}`).focus();
-      };
-      inp.onkeydown = e => {
-        if (e.key === 'Backspace' && !e.target.value && i > 0) document.getElementById(`p${i - 1}`).focus();
-        if (e.key === 'Enter') game.check();
-      };
-    });
-  },
+  function drawFallbackBackground(){
+    const g = ctx.createLinearGradient(0,0,0,A4_H);
+    g.addColorStop(0, "#f7f1e6");
+    g.addColorStop(1, "#efe2cd");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,A4_W,A4_H);
 
-  select(el, val) {
-    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    document.getElementById('ansInput').value = val;
-  },
+    ctx.strokeStyle = "#3b2a1a";
+    ctx.lineWidth = 18;
+    ctx.strokeRect(120,120,A4_W-240,A4_H-240);
+    ctx.lineWidth = 6;
+    ctx.strokeRect(160,160,A4_W-320,A4_H-320);
 
-  check() {
-    const q = PHASES[state.phase].questions[state.question];
-    let ans = '';
-
-    if (q.type.startsWith('pin')) {
-      document.querySelectorAll('.pin-input').forEach(i => ans += i.value);
+    ctx.fillStyle = "rgba(59,42,26,.10)";
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(320, 260, A4_W-640, 2450, 120);
+      ctx.fill();
     } else {
-      ans = document.getElementById('ansInput')?.value || '';
+      ctx.fillRect(320, 260, A4_W-640, 2450);
     }
 
-    if (!ans.trim()) {
-      errorToast("⚠️ أجيبي على السؤال أولاً!");
-      return;
-    }
+    ctx.fillStyle = "rgba(246,196,84,.35)";
+    ctx.beginPath();
+    ctx.arc(A4_W-420, 520, 120, 0, Math.PI*2);
+    ctx.fill();
+  }
 
-    state.attempts++;
+  // ====== Tracks UI ======
+  function initTracks(){
+    document.querySelectorAll("select.track").forEach(sel=>{
+      sel.innerHTML = TRACK_OPTIONS.map(opt => `<option value="${opt}">${opt}</option>`).join("");
+      const i = Number(sel.dataset.i);
+      const def = DEFAULT_TRACKS[i-1];
+      if(def && TRACK_OPTIONS.includes(def)) sel.value = def;
 
-    if (normalize(ans) === normalize(q.answer)) {
-      successBubble(q.success || "✅ صحيح!");
-      
-      setTimeout(() => {
-        state.question++;
-        save();
-
-        if (state.question >= PHASES[state.phase].questions.length) {
-          this.showMission();
-        } else {
-          this.render();
+      sel.addEventListener("change", ()=>{
+        const i = sel.dataset.i;
+        const other = document.querySelector(`input.trackOther[data-i="${i}"]`);
+        if(sel.value.startsWith("أخرى")){
+          other.style.display = "block";
+        }else{
+          other.style.display = "none";
+          other.value = "";
         }
-      }, 2100);
-    } else {
-      errorToast("❌ خطأ! حاولي مرة أخرى");
-      navigator.vibrate?.(200);
-      save();
-    }
-  },
-
-  showMission() {
-    const m = PHASES[state.phase].mission;
-    document.getElementById('missionIcon').textContent = m.icon;
-    document.getElementById('missionDesc').textContent = m.desc;
-    document.getElementById('secretCodeInput').value = '';
-    showScreen('screen-mission');
-  },
-
-  async verifyCode() {
-    const code = document.getElementById('secretCodeInput')?.value || '';
-    if (!code.trim()) {
-      errorToast("⚠️ أدخلي الكود!");
-      return;
-    }
-
-    const phase = PHASES[state.phase];
-
-    if (normalize(code) === normalize(phase.mission.code)) {
-      if (phase.celebration === 'stars') {
-        await showStarsCelebration(phase.name, phase.icon);
-      } else {
-        await showCurtainCelebration(phase.name, phase.icon);
-      }
-
-      state.phase++;
-      state.question = 0;
-      save();
-
-      if (state.phase >= PHASES.length) {
-        this.showWin();
-      } else {
-        showScreen('screen-game');
-        this.render();
-      }
-    } else {
-      errorToast("❌ الكود خاطئ!");
-      navigator.vibrate?.(200);
-    }
-  },
-
-  showWin() {
-    document.getElementById('winAttempts').textContent = state.attempts;
-    
-    const digits = document.getElementById('finalCodeDigits');
-    digits.innerHTML = '';
-    FINAL_CODE.split('').forEach(d => {
-      digits.innerHTML += `<div class="digit-box">${d}</div>`;
+        render();
+      });
     });
 
-    showScreen('screen-win');
-    
-    setTimeout(() => confetti(100), 500);
-    setTimeout(() => confetti(80), 1500);
-    setTimeout(() => confetti(60), 2500);
-  },
-
-  showHint() {
-    const q = PHASES[state.phase].questions[state.question];
-    successBubble("💡 " + (q.hint || "لا يوجد تلميح"));
+    document.querySelectorAll("input.trackOther").forEach(inp=> inp.addEventListener("input", render));
   }
-};
 
-document.addEventListener('DOMContentLoaded', () => game.init());
+  function getTracks(){
+    const out = [];
+    for(let i=1;i<=4;i++){
+      if(i===4 && !track4Enabled) break;
+      const sel = document.querySelector(`select.track[data-i="${i}"]`);
+      const other = document.querySelector(`input.trackOther[data-i="${i}"]`);
+      let val = sel?.value || "";
+      if(val.startsWith("أخرى")) val = other?.value?.trim() || "مسار (اكتب المحتوى)";
+      out.push(val);
+    }
+    return out;
+  }
+
+  function buildData(){
+    const contest = clampText(contestName.value, 60);
+    const contestFinal = contest || "مسابقة حفظ القرآن الكريم";
+
+    const introFinal = isEmpty(intro.value) ? DEFAULT_INTRO() : intro.value.trim();
+    const tracks = getTracks();
+
+    return {
+      bg: (bgDataUrl || bgUrl.value.trim()),
+      contest: contestFinal,
+      intro: introFinal,
+      tracks,
+      deadline: deadline.value.trim() || "29 رمضان",
+      note: note.value.trim(),
+      closing: closing.value.trim() || DEFAULT_CLOSING
+    };
+  }
+
+  // ====== Render ======
+  async function render(){
+    setStatus("يتم التحديث...");
+    const data = buildData();
+
+    ctx.clearRect(0,0,A4_W,A4_H);
+
+    let img = null;
+    let usedFallback = false;
+
+    const bgToUse = data.bg;
+    if(bgToUse){
+      try{ img = await loadImage(bgToUse); }catch(e){ img = null; }
+    }
+
+    if(img){
+      ctx.drawImage(img, 0, 0, A4_W, A4_H);
+    }else{
+      usedFallback = true;
+      drawFallbackBackground();
+    }
+
+    const titleColor = "#3b2a1a";
+    const bodyColor  = "#3b2a1a";
+    const accentColor = "#8a5a2a";
+
+    const centerX = A4_W/2;
+
+    // ====== IMPORTANT: First item is Contest name ======
+    let y = 540;
+    ctx.fillStyle = titleColor;
+    ctx.font = "900 112px Tajawal";
+    const contestLines = wrapText(ctx, data.contest, 1750);
+    contestLines.slice(0,2).forEach((ln, i)=> ctx.fillText(ln, centerX, y + i*120));
+    y += Math.min(2, contestLines.length)*120;
+
+    // Intro
+    y += 90;
+    ctx.font = "700 46px Tajawal";
+    ctx.fillStyle = bodyColor;
+    const introH = drawWrapped(ctx, data.intro, centerX, y, 1750, 74, "center");
+    y += introH + 90;
+
+    // Tracks
+    ctx.fillStyle = accentColor;
+    ctx.font = "900 72px Tajawal";
+    ctx.fillText("مسارات المسابقة", centerX, y);
+    y += 90;
+
+    ctx.fillStyle = bodyColor;
+    ctx.font = "700 42px Tajawal";
+    ctx.fillText("(يختار كل مشارك مسارًا واحدًا فقط)", centerX, y);
+    y += 90;
+
+    ctx.font = "800 52px Tajawal";
+    const t = data.tracks;
+    const labels = ["الأول","الثاني","الثالث","الرابع"];
+
+    t.forEach((val, idx)=>{
+      const line = `المسار ${labels[idx]}: ${val}.`;
+      const h = drawWrapped(ctx, line, centerX, y, 1750, 78, "center");
+      y += h + 12;
+    });
+
+    // ====== “Top section moved to end” => deadline/note/closing at bottom area ======
+    y = Math.max(y + 120, A4_H - 520);
+
+    ctx.fillStyle = bodyColor;
+    ctx.font = "900 58px Tajawal";
+    ctx.fillText(`⏳ آخر موعد للتسليم: ${data.deadline}`, centerX, y);
+
+    y += 95;
+    if(data.note){
+      ctx.font = "800 46px Tajawal";
+      const h = drawWrapped(ctx, data.note, centerX, y, 1750, 70, "center");
+      y += h + 40;
+    }
+
+    ctx.fillStyle = accentColor;
+    ctx.font = "900 56px Tajawal";
+    drawWrapped(ctx, `⭐ ${data.closing} ⭐`, centerX, y, 1750, 76, "center");
+
+    setStatus(usedFallback ? "تم (قالب بديل للطباعة)" : "تم");
+  }
+
+  // ====== Downloads ======
+  function downloadCanvasPNG(){
+    const dataURL = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.download = "ramadan-competition-a4.png";
+    a.href = dataURL;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function downloadCanvasPDF(){
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4", compress: true });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    pdf.addImage(imgData, "JPEG", 0, 0, pageW, pageH);
+    pdf.save("ramadan-competition-a4.pdf");
+  }
+
+  // ====== Events ======
+  function wire(){
+    // Upload background to avoid CORS
+    bgFile.addEventListener("change", ()=>{
+      const file = bgFile.files && bgFile.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { bgDataUrl = String(reader.result || ""); render(); };
+      reader.readAsDataURL(file);
+    });
+
+    // Auto render
+    document.querySelectorAll("input,textarea,select").forEach(el=> el.addEventListener("input", render));
+
+    toggleTrack4.addEventListener("click", ()=>{
+      track4Enabled = !track4Enabled;
+      track4Wrap.style.display = track4Enabled ? "block" : "none";
+      toggleTrack4.textContent = track4Enabled ? "حذف المسار الرابع" : "إضافة المسار الرابع";
+      toggleTrack4.classList.toggle("danger", track4Enabled);
+      render();
+    });
+
+    renderBtn.addEventListener("click", render);
+    downloadPng.addEventListener("click", downloadCanvasPNG);
+    downloadPdf.addEventListener("click", downloadCanvasPDF);
+  }
+
+  initTracks();
+  wire();
+  render();
 </script>
+
 </body>
 </html>
